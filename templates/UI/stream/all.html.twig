@@ -1,0 +1,58 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+    <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Streams</h1>
+    <div>
+        {{ form_start(searchForm) }}
+        <div class="flex gap-2">
+            {{ form_widget(searchForm.search, {attr: {class: 'form-input w-full md:w-64'}}) }}
+            <button type="submit" class="button button-secondary">Search</button>
+        </div>
+        {{ form_end(searchForm) }}
+    </div>
+</div>
+
+{% if search %}
+    {% include 'UI/_partial/search_results_text.html.twig' with {search, count} %}
+{% endif %}
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="font-medium text-slate-700">*</td>
+                <td class="text-right">
+                    <a class="text-slate-400 hover:text-slate-600 transition-colors"
+                       data-tippy-target="children"
+                       data-tippy-content="View stream"
+                       href="{{ path('view_stream', {id: '*'}) }}">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </a>
+                </td>
+            </tr>
+            {% for stream in streams %}
+                <tr>
+                    <td class="font-medium text-slate-700">{{ stream.id }}</td>
+                    <td class="text-right">
+                        <a class="text-slate-400 hover:text-slate-600 transition-colors"
+                           data-tippy-target="children"
+                           data-tippy-content="View stream"
+                           href="{{ path('view_stream', {id: stream.id}) }}">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'UI/_partial/pagination.html.twig' with {pages, route: 'streams', id: null} %}
+</div>
+
+{% endblock %}

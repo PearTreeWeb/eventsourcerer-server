@@ -1,8 +1,12 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
-    #csrf_protection: true
+    csrf_protection: ~
     http_method_override: false
+
+    trusted_proxies: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+    trusted_headers: ['x-forwarded-proto', 'x-forwarded-for']
+
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.
@@ -16,6 +20,13 @@ framework:
     #fragments: true
     php_errors:
         log: true
+
+    messenger:
+        # The bus that is going to be injected when injecting MessageBusInterface
+        default_bus: command.bus
+        buses:
+            command.bus:
+            query.bus:
 
 when@test:
     framework:

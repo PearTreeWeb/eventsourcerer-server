@@ -1,0 +1,24 @@
+<turbo-frame id="active-workers">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm min-h-40 h-full">
+        {% include 'UI/widget/template_header.html.twig' with {icon: 'fa-person-digging', name: 'Connected Workers'} %}
+
+        <div class="p-5">
+            <table class="table-auto text-xs w-full text-slate-400">
+                <tbody data-controller="active-workers-listener"
+                       data-active-workers-listener-listen-to-value="{{ path('simple_server_events_connected_workers') }}"
+                >
+                {% for application, applicationWorkers in activeWorkers %}
+                    {% for worker in applicationWorkers %}
+                        <tr class="even:bg-gray-50 hover:bg-gray-200">
+                            <td class="p-2">{{ application }}</td>
+                            <td>{{ worker }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="2" class="text-slate-400 italic">No workers connected currently</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</turbo-frame>

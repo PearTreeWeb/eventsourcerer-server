@@ -3,13 +3,44 @@
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
-parameters:
+imports:
+    - { resource: 'sockets.yaml' }
 
+parameters:
+    app.certs.ca_filename: '%env(SOCKET_CA_ROOT_FILENAME)%'
+    app.certs.ca_key_filename: '%env(SOCKET_CA_ROOT_KEY_FILENAME)%'
+    app.certs.folder.server: 'certs'
+    app.certs.folder.client: 'certs'
+    app.certs.socket: 'eventsourcerer.docker.localhost.pem'
+    app.certs.socket_key: 'eventsourcerer.docker.localhost-key.pem'
+    app.socket.application_hostname: '%env(SOCKET_APPLICATION_HOSTNAME)%'
+    app.socket.secure: '%env(bool:SOCKET_SECURE)%'
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+        bind:
+            $certsFolder: '%kernel.project_dir%/%app.certs.folder.client%'
+            $projectRoot: '%kernel.project_dir%'
+            $socketApplicationHostname: '%app.socket.application_hostname%'
+            $socketCAFilename: '%app.certs.ca_filename%'
+            $socketCAKeyFilename: '%app.certs.ca_key_filename%'
+            $socketCert: '%kernel.project_dir%/%app.certs.folder.server%/%app.certs.socket%'
+            $socketCertKey: '%kernel.project_dir%/%app.certs.folder.server%/%app.certs.socket_key%'
+            $socketCaFile: '%kernel.project_dir%/%app.certs.folder.server%/%app.certs.ca_filename%'
+            $socketHost: '%app.socket.host%'
+            $socketPort: '%app.socket.port%'
+            $socketSecure: '%app.socket.secure%'
+            iterable $messageHandlers: !tagged_iterator app.message_handler
+            iterable $mutationTypes: !tagged_iterator eventsourcerer.mutation_type
+            iterable $propertyTypes: !tagged_iterator eventsourcerer.property_type
+            iterable $projections: !tagged_iterator eventsourcerer.projection
+            iterable $widgets: !tagged_iterator app.widget
+            iterable $eventTemplates: !tagged_iterator eventsourcerer.event_template
+            iterable $conditionOperators: !tagged_iterator eventsourcerer.condition_operator
+            iterable $steps: !tagged_iterator app.setup_step
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -20,5 +51,121 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Command\EventGenerator:
+        arguments:
+            $servicesResetter: '@services_resetter'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # value resolvers
+
+    App\ValueResolver\WidgetNameResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 150 }
+
+
+    App\ValueResolver\EventPropertyNameResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 150 }
+
+    App\ValueResolver\UuidResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 150 }
+
+    App\ValueResolver\ApplicationIdResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 150 }
+
+    App\ValueResolver\StreamIdResolver:
+        tags:
+            - { name: controller.argument_value_resolver, priority: 150 }
+
+    _instanceof:
+        App\Infrastructure\MessageHandler:
+            tags: [ 'app.message_handler' ]
+        App\Setup\Step\SetupStepInterface:
+            tags: [ 'app.setup_step' ]
+
+    Symfony\Component\VarDumper\Cloner\VarCloner:
+        public: true
+
+    App\Domain\Event\Repository\EventWriterRepository:
+        class: App\Repository\Cache\CacheEventWriterRepository
+
+    App\Domain\Client\Repository\StreamRepository:
+        class: App\Repository\DoctrineStreamRepository
+
+    App\Domain\Client\Repository\StreamEventRepository:
+        class: App\Repository\DoctrineStreamEventRepository
+
+    App\Domain\Projection\Repository\ProjectionRepository:
+        class: App\Repository\DoctrineProjectionRepository
+
+    App\Domain\Event\Repository\EventRepository:
+        class: App\Repository\DoctrineEventRepository
+
+    App\Domain\Projection\Repository\ProjectionMutationRepository:
+        class: App\Repository\DoctrineProjectionMutationRepository
+
+    App\Domain\Projection\Repository\ProjectionStateRepository:
+        class: App\Repository\DoctrineProjectionStateRepository
+
+    # API Platform Doctrine extensions
+    App\Infrastructure\ApiPlatform\ProjectionStateExposureExtension:
+        tags:
+            - { name: 'api_platform.doctrine.orm.query_extension.collection' }
+            - { name: 'api_platform.doctrine.orm.query_extension.item' }
+
+    App\Setup\InstallStateService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    App\Setup\Step\CheckDatabaseConnectionStep:
+        tags:
+            - { name: app.setup_step, priority: 100 }
+
+    App\Setup\Step\RunMigrationsStep:
+        tags:
+            - { name: app.setup_step, priority: 90 }
+
+    App\Setup\Step\LoadProjectionsStep:
+        tags:
+            - { name: app.setup_step, priority: 85 }
+
+    App\Setup\Step\LoadTemplatesStep:
+        tags:
+            - { name: app.setup_step, priority: 84 }
+
+    App\Setup\Step\GenerateJwtKeysStep:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $logger: '@logger'
+            $jwtSecretKey: '%env(default::JWT_SECRET_KEY)%'
+            $jwtPublicKey: '%env(default::JWT_PUBLIC_KEY)%'
+        tags:
+            - { name: app.setup_step, priority: 80 }
+
+    App\Setup\Step\CheckSystemCertTrustStep:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $socketCAFilename: '%app.certs.ca_filename%'
+        tags:
+            - { name: app.setup_step, priority: 70 }
+
+    App\Setup\Step\CheckSocketServerStep:
+        arguments:
+            $socketHost: '%app.socket.host%'
+            $socketPort: '%app.socket.port%'
+            $socketCaFile: '%kernel.project_dir%/%app.certs.folder.server%/%app.certs.ca_filename%'
+            $socketSecure: '%app.socket.secure%'
+        tags:
+            - { name: app.setup_step, priority: 60 }
+
+    App\Setup\Step\CheckFirstUserCreatedStep:
+        tags:
+            - { name: app.setup_step, priority: 50 }
+
+    App\Domain\Application\Service\CertificateGenerator:
+        class: App\Infrastructure\Service\OpenSSLCertificateGenerator
+        arguments:

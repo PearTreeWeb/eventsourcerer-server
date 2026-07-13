@@ -1,0 +1,23 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="glow-v-fav" x="-50%" y="-40%" width="200%" height="180%">
+            <feGaussianBlur stdDeviation="1.5" result="b1"/>
+            <feGaussianBlur stdDeviation="4" result="b2"/>
+            <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-t-fav" x="-50%" y="-40%" width="200%" height="180%">
+            <feGaussianBlur stdDeviation="1.5" result="b1"/>
+            <feGaussianBlur stdDeviation="4" result="b2"/>
+            <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+    </defs>
+    <rect width="64" height="64" rx="8" fill="#0f172a"/>
+    <text x="20" y="48" text-anchor="middle"
+          font-family="'Arial Black', 'Impact', sans-serif"
+          font-weight="900" font-size="44"
+          fill="#c4a8ff" filter="url(#glow-v-fav)">E</text>
+    <text x="44" y="48" text-anchor="middle"
+          font-family="'Arial Black', 'Impact', sans-serif"
+          font-weight="900" font-size="44"
+          fill="#4dffd2" filter="url(#glow-t-fav)">S</text>
+</svg>

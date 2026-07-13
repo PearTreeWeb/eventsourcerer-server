@@ -1,0 +1,7 @@
+# config/packages/stimulus.yaml
+stimulus:
+  # the default values
+  controller_paths:
+    - '%kernel.project_dir%/assets/controllers'
+    - '%kernel.project_dir%/src/Extension/assets/js/controllers'
+  controllers_json: '%kernel.project_dir%/assets/controllers.json'

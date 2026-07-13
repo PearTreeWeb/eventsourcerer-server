@@ -1,0 +1,52 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Manage Application Checkpoints</h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ path('reset_all_application_checkpoints', {applicationId}) }}"
+               data-turbo-method="get"
+               data-turbo-confirm="Are you sure you want to reset all checkpoints for this application?"
+               class="button button-danger"
+            >Reset all checkpoints</a>
+            <a class="button button-secondary" href="{{ path('applications') }}">Back to Applications</a>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+         data-controller="update-checkpoints"
+         data-update-checkpoints-listen-to-value="{{ path('simple_server_events_for_application_checkpoints', {applicationId}) }}"
+    >
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Stream</th>
+                <th colspan="2">Checkpoint</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for checkpoint in checkpoints %}
+                <tr>
+                    <td>
+                        <a class="text-emerald-600 hover:text-emerald-800 font-medium"
+                           target="_blank"
+                           href="{{ path('view_stream', {id: checkpoint.streamId}) }}"
+                        >{{ checkpoint.streamId }}</a>
+                    </td>
+                    <td data-checkpoint="{{ checkpoint.streamId }}">{{ checkpoint.checkpoint }}</td>
+                    <td class="text-right">
+                        <a class="text-slate-400 hover:text-emerald-600 transition-colors" href="{{ path(
+                            'edit_application_checkpoint_for_stream',
+                            {
+                                applicationId: checkpoint.applicationId,
+                                streamId: checkpoint.streamId
+                            }) }}"
+                        >
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

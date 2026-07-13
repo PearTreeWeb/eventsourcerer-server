@@ -1,0 +1,18 @@
+{% extends 'UI/layout/base.html.twig' %}
+{% form_theme form 'form/main_theme.html.twig' %}
+
+{% block title %}Reset your password{% endblock %}
+
+{% block content %}
+    <h1 class="font-bold mt-4 mb-10">Reset Password</h1>
+
+    {{ form_start(form) }}
+        <div class="mb-4">
+            {{ form_label(form.email, null, {label_attr: {class: 'block text-gray-700 text-sm font-bold mb-2'}}) }}
+            {{ form_widget(form.email, { attr: { class: 'border-2 rounded-sm text-gray-600 p-2 w-1/2' }}) }}
+            {{ form_errors(form.email) }}
+        </div>
+    
+        <button class="button button-primary">Send password reset email</button>
+    {{ form_end(form) }}
+{% endblock %}

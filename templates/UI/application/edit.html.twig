@@ -1,0 +1,98 @@
+{% extends 'UI/layout/base.html.twig' %}
+{% form_theme form 'form/main_theme.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Edit Application</h1>
+        <a class="button button-secondary" href="{{ path('applications') }}">Back to Applications</a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-full mb-8">
+        {{ form_errors(form) }}
+        {{ form_start(form) }}
+            <div class="mb-5">
+                {{ form_label(form.name, 'Application Name', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.name, { attr: { class: 'form-input' }} ) }}
+                {{ form_errors(form.name) }}
+            </div>
+            <div class="mb-6">
+                {{ form_label(form.hostname, 'Hostname (optional)', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.hostname, { attr: { class: 'form-input', placeholder: 'e.g. my-app.local' }} ) }}
+                {{ form_errors(form.hostname) }}
+                <p class="text-slate-500 text-xs mt-1.5">If left empty, a hostname will be automatically generated based on the application name (e.g. app-name.docker.localhost).</p>
+            </div>
+            <button class="button button-primary" type="submit">Save</button>
+        {{ form_end(form) }}
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-full mb-8">
+        <h2 class="text-sm font-semibold text-slate-700 mb-4">Application Secret</h2>
+        <p class="text-slate-500 text-xs mb-4">For security reasons, the secret is stored as a hash. You can regenerate it if you have lost it.</p>
+        
+        {{ form_start(regenerateSecretForm) }}
+            <button class="button button-secondary" type="submit" data-turbo-confirm="Are you sure you want to regenerate the application secret? The old secret will stop working immediately.">Regenerate Secret</button>
+        {{ form_end(regenerateSecretForm) }}
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-full mb-8">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-sm font-semibold text-slate-700">Environment variables (Laravel / Symfony)</p>
+            {% if is_granted('ROLE_SUPER_USER') %}
+                <a class="text-slate-400 hover:text-slate-600 transition-colors" href="{{ path('download_application_env_vars', {id}) }}">
+                    <i class="fa-solid fa-download"></i>
+                </a>
+            {% endif %}
+        </div>
+        <p class="text-slate-500 text-xs">Download a <code>.env</code> file pre-populated with the environment variables for this application.</p>
+    </div>
+
+    <div class="max-w-full space-y-6">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-semibold text-slate-700">Application certificate (use for socket connection)</p>
+                {% if is_granted('ROLE_SUPER_USER') %}
+                    <a class="text-slate-400 hover:text-slate-600 transition-colors" href="{{ path('download_application_certificate', {id}) }}">
+                        <i class="fa-solid fa-download"></i>
+                    </a>
+                {% endif %}
+            </div>
+            <div>
+                {{ form_start(certForm) }}
+                <div class="mb-4">
+                    {{ form_widget(certForm.certificate, {attr:
+                        {
+                            rows: 22,
+                            class: 'w-full p-4 text-sm bg-slate-50 border border-slate-200 text-slate-600 whitespace-pre-wrap break-all'},
+                        })
+                    }}
+                </div>
+                <button class="button button-primary" type="submit" data-turbo-confirm="Are you sure you want to update the certificate">Update</button>
+                {{ form_end(certForm) }}
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-semibold text-slate-700">Application certificate key (use for socket connection)</p>
+                {% if is_granted('ROLE_SUPER_USER') %}
+                    <a class="text-slate-400 hover:text-slate-600 transition-colors" href="{{ path('download_application_certificate_key', {id}) }}">
+                        <i class="fa-solid fa-download"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+            <div>
+                {{ form_start(certKeyForm) }}
+                <div class="mb-4">
+                    {{ form_widget(certKeyForm.certificate, {attr:
+                        {
+                            rows: 22,
+                            class: 'w-full p-4 text-sm bg-slate-50 border border-slate-200 text-slate-600 whitespace-pre-wrap break-all'},
+                        })
+                    }}
+                </div>
+                <button class="button button-primary" type="submit" data-turbo-confirm="Are you sure you want to update the certificate">Update</button>
+                {{ form_end(certKeyForm) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,103 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Match expression does not handle remaining value\: string$#'
+			identifier: match.unhandled
+			count: 1
+			path: src/Command/EventGenerator.php
+
+		-
+			message: '#^Unable to resolve the template type TMapWithKeysKey in call to method Illuminate\\Support\\Collection\<\(int\|string\),App\\Domain\\Projection\\Model\\CanMutate\>\:\:mapWithKeys\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Controller/Projection/DefineStateMutations.php
+
+		-
+			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Support\\Collection\<\(int\|string\),App\\Domain\\Projection\\Model\\CanMutate\>\:\:mapWithKeys\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Controller/Projection/DefineStateMutations.php
+
+		-
+			message: '#^Method App\\Domain\\Common\\Model\\CanBeCreatedFromArray\:\:fromArray\(\) has parameter \$item with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Domain/Common/Model/CanBeCreatedFromArray.php
+
+		-
+			message: '#^Method App\\Domain\\Common\\Model\\CanBeRepresentedAsArray\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Domain/Common/Model/CanBeRepresentedAsArray.php
+
+		-
+			message: '#^Method App\\Domain\\Event\\Model\\EventPropertyValue\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Domain/Event/Model/EventPropertyValue.php
+
+		-
+			message: '#^Property App\\Entity\\Connection\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Connection.php
+
+		-
+			message: '#^Property App\\Entity\\MutationCondition\:\:\$id is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/MutationCondition.php
+
+		-
+			message: '#^Property App\\Entity\\MutationConditionsGroup\:\:\$id is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/MutationConditionsGroup.php
+
+		-
+			message: '#^Property App\\Entity\\ProjectionState\:\:\$id is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/ProjectionState.php
+
+		-
+			message: '#^Property App\\Entity\\ResetPasswordRequest\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ResetPasswordRequest.php
+
+		-
+			message: '#^Property App\\Entity\\RuntimeError\:\:\$id is unused\.$#'
+			identifier: property.unused
+			count: 1
+			path: src/Entity/RuntimeError.php
+
+		-
+			message: '#^Property App\\Entity\\StreamEventProperty\:\:\$id is never written, only read\.$#'
+			identifier: property.onlyRead
+			count: 1
+			path: src/Entity/StreamEventProperty.php
+
+		-
+			message: '#^Class App\\Repository\\ResetPasswordRequestRepository has PHPDoc tag @method for method findBy\(\) parameter \#1 \$criteria with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ResetPasswordRequestRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ResetPasswordRequestRepository has PHPDoc tag @method for method findBy\(\) parameter \#2 \$orderBy with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ResetPasswordRequestRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ResetPasswordRequestRepository has PHPDoc tag @method for method findOneBy\(\) parameter \#1 \$criteria with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ResetPasswordRequestRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ResetPasswordRequestRepository has PHPDoc tag @method for method findOneBy\(\) parameter \#2 \$orderBy with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ResetPasswordRequestRepository.php

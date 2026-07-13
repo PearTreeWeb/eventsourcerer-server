@@ -1,0 +1,54 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Projections</h1>
+        <a class="button button-primary" href="{{ path('register_projection') }}">Register Projection</a>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for projection in projections %}
+                <tr>
+                    <td class="font-medium text-slate-700">{{ projection.name }}</td>
+                    <td class="text-right">
+                        <div class="flex items-center justify-end gap-4">
+                            <a class="text-slate-400 hover:text-slate-600 transition-colors"
+                               href="{{ path('edit_projection', {id: projection.id}) }}"
+                               data-tippy-content="Edit" data-tippy-target="children">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </a>
+                            {% if is_granted('ROLE_SUPER_USER') %}
+                                <a class="text-slate-400 hover:text-slate-600 transition-colors"
+                                   href="{{ path('reset_projection', {id: projection.id}) }}"
+                                   data-tippy-content="Reset"
+                                   data-tippy-target="children"
+                                   data-turbo-method="get"
+                                   data-turbo-confirm="Are you sure you want to reset the projection?"
+                                >
+                                    <i class="fa-solid fa-rotate-right"></i>
+                                </a>
+                                <a class="text-slate-400 hover:text-red-600 transition-colors"
+                                   data-turbo-method="delete"
+                                   data-tippy-content="Delete"
+                                   data-tippy-target="children"
+                                   data-turbo-confirm="Are you sure you want to delete the projection?"
+                                   href="{{ path('delete_projection', {id: projection.id}) }}"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

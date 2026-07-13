@@ -1,0 +1,198 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div data-controller="packages-filter">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <h1 class="text-xl font-semibold text-slate-800">Packages</h1>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex items-center gap-2">
+                    <label for="author-filter" class="text-sm font-medium text-slate-600">Author:</label>
+                    <select id="author-filter" data-packages-filter-target="author" data-action="change->packages-filter#filter" class="form-input py-1.5 text-sm">
+                        <option value="">All Authors</option>
+                        {% for author in authors %}
+                            <option value="{{ author }}">{{ author }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="package-filter" class="text-sm font-medium text-slate-600">Package:</label>
+                    <select id="package-filter" data-packages-filter-target="package" data-action="change->packages-filter#filter" class="form-input py-1.5 text-sm">
+                        <option value="">All Packages</option>
+                        {% for package in packages %}
+                            <option value="{{ package }}">{{ package }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-b border-slate-200 mb-6">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
+                <button data-packages-filter-target="tab" data-tab="propertyTypes" data-action="click->packages-filter#switchTab"
+                        class="border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Property Types
+                </button>
+                <button data-packages-filter-target="tab" data-tab="widgets" data-action="click->packages-filter#switchTab"
+                        class="border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Widgets
+                </button>
+                <button data-packages-filter-target="tab" data-tab="conditionOperators" data-action="click->packages-filter#switchTab"
+                        class="border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Condition Operators
+                </button>
+                <button data-packages-filter-target="tab" data-tab="mutationTypes" data-action="click->packages-filter#switchTab"
+                        class="border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Mutation Types
+                </button>
+            </nav>
+        </div>
+
+        <div data-packages-filter-target="content" data-tab="propertyTypes" class="hidden">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="data-table" data-controller="datatable">
+                        <thead>
+                            <tr>
+                                <th>Author</th>
+                                <th>Package</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for author, extension in extensions %}
+                                {% for propertyType in extension.propertyTypes %}
+                                    <tr data-packages-filter-target="row" data-author="{{ author }}" data-package="{{ propertyType.package }}">
+                                        <td class="text-sm text-slate-500">{{ author }}</td>
+                                        <td class="text-sm text-slate-500">{{ propertyType.package }}</td>
+                                        <td class="font-medium text-slate-700">{{ propertyType.name }}</td>
+                                        <td class="font-mono text-xs text-slate-400">{{ propertyType.class }}</td>
+                                        <td class="flex space-x-4">
+                                            <div data-controller="modal" class="text-right">
+                                                <dialog data-modal-target="dialog" class="w-11/12 md:w-1/2 rounded-xl">
+                                                    <div class="mb-4 font-semibold text-slate-700">Condition Operators</div>
+                                                    <table class="data-table">
+                                                        <tbody>
+                                                        {% for conditionOperator in propertyType.conditionOperators %}
+                                                            <tr>
+                                                                <td>{{ conditionOperator }}</td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                    <div class="flex justify-end mt-4">
+                                                        <button class="button button-secondary" data-action="modal#close">Close</button>
+                                                    </div>
+                                                </dialog>
+                                                <span class="cursor-pointer text-emerald-600 hover:text-emerald-800 text-sm font-medium" data-action="click->modal#show">operators</span>
+                                            </div>
+                                            <div data-controller="modal">
+                                                <dialog data-modal-target="dialog" class="w-11/12 md:w-1/2 rounded-xl">
+                                                    <div class="mb-4 font-semibold text-slate-700">Example Input</div>
+                                                    <pre>"{{ propertyType.exampleInput }}"</pre>
+                                                    <div class="flex justify-end mt-4">
+                                                        <button class="button button-secondary" data-action="modal#close">Close</button>
+                                                    </div>
+                                                </dialog>
+                                                <span class="cursor-pointer text-emerald-600 hover:text-emerald-800 text-sm font-medium" data-action="click->modal#show">example input</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div data-packages-filter-target="content" data-tab="widgets" class="hidden">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="data-table" data-controller="datatable">
+                        <thead>
+                            <tr>
+                                <th>Author</th>
+                                <th>Package</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for author, extension in extensions %}
+                                {% for widget in extension.widgets %}
+                                    <tr data-packages-filter-target="row" data-author="{{ author }}" data-package="{{ widget.package }}">
+                                        <td class="text-sm text-slate-500">{{ author }}</td>
+                                        <td class="text-sm text-slate-500">{{ widget.package }}</td>
+                                        <td class="font-medium text-slate-700">{{ widget.name }}</td>
+                                        <td class="font-mono text-xs text-slate-400">{{ widget.class }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div data-packages-filter-target="content" data-tab="conditionOperators" class="hidden">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="data-table" data-controller="datatable">
+                        <thead>
+                            <tr>
+                                <th>Author</th>
+                                <th>Package</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for author, extension in extensions %}
+                                {% for conditionOperator in extension.conditionOperators %}
+                                    <tr data-packages-filter-target="row" data-author="{{ author }}" data-package="{{ conditionOperator.package }}">
+                                        <td class="text-sm text-slate-500">{{ author }}</td>
+                                        <td class="text-sm text-slate-500">{{ conditionOperator.package }}</td>
+                                        <td class="font-medium text-slate-700">{{ conditionOperator.name }}</td>
+                                        <td class="font-mono text-xs text-slate-400">{{ conditionOperator.class }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div data-packages-filter-target="content" data-tab="mutationTypes" class="hidden">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="data-table" data-controller="datatable">
+                        <thead>
+                            <tr>
+                                <th>Author</th>
+                                <th>Package</th>
+                                <th>Name</th>
+                                <th>Class</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for author, extension in extensions %}
+                                {% for mutationType in extension.mutationTypes %}
+                                    <tr data-packages-filter-target="row" data-author="{{ author }}" data-package="{{ mutationType.package }}">
+                                        <td class="text-sm text-slate-500">{{ author }}</td>
+                                        <td class="text-sm text-slate-500">{{ mutationType.package }}</td>
+                                        <td class="font-medium text-slate-700">{{ mutationType.name }}</td>
+                                        <td class="font-mono text-xs text-slate-400">{{ mutationType.class }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

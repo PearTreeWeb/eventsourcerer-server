@@ -1,0 +1,31 @@
+{% extends 'UI/layout/base.html.twig' %}
+{% form_theme form 'form/main_theme.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Register Application</h1>
+        <a class="button button-secondary" href="{{ path('applications') }}">Back to Applications</a>
+    </div>
+    <div class="mb-6">
+        {% include 'UI/_partial/info_box.html.twig' with {
+            info: 'Register here any applications that will subscribe to streams'
+        } %}
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-lg">
+        {{ form_errors(form) }}
+        {{ form_start(form, {attr: {'data-controller': 'prototype'}}) }}
+            <div class="mb-5">
+                {{ form_label(form.name, 'Application Name', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.name, { attr: { class: 'form-input w-full' }} ) }}
+                {{ form_errors(form.name) }}
+            </div>
+            <div class="mb-6">
+                {{ form_label(form.hostname, 'Hostname (optional)', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.hostname, { attr: { class: 'form-input w-full', placeholder: 'e.g. my-app.local' }} ) }}
+                {{ form_errors(form.hostname) }}
+                <p class="text-slate-500 text-xs mt-1.5">If left empty, a hostname will be automatically generated based on the application name (e.g. app-name.docker.localhost).</p>
+            </div>
+            <button class="button button-primary" type="submit">Save</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

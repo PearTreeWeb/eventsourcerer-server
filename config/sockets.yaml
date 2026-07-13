@@ -1,0 +1,22 @@
+parameters:
+    app.socket.host: '%env(SOCKET_SERVER_HOST)%'
+    app.socket.port: '%env(SOCKET_SERVER_PORT)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    Evenement\EventEmitterInterface:
+        factory: [ 'App\Infrastructure\Factory\SocketServerFactory', 'create' ]
+        arguments:
+
+            $cert: '%kernel.project_dir%/%app.certs.folder.server%/%app.certs.socket%'
+            $certKey: '%kernel.project_dir%/%app.certs.folder.server%/%app.certs.socket_key%'
+            $caFile: '%kernel.project_dir%/%app.certs.folder.server%/%app.certs.ca_filename%'
+            $socketHost: '%app.socket.host%'
+            $socketPort: '%app.socket.port%'
+            $socketSecure: '%app.socket.secure%'
+
+    React\EventLoop\LoopInterface:
+        factory: [ 'React\EventLoop\Loop', 'get' ]

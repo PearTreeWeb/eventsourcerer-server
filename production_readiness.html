@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Readiness Checklist - EventSourcerer</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        .category { background: #f8f9fa; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 20px; }
+        ul { list-style-type: none; padding-left: 0; }
+        li { margin-bottom: 10px; padding-left: 25px; position: relative; }
+        li:before { content: "☐"; position: absolute; left: 0; color: #3498db; font-weight: bold; }
+        li.critical:before { content: "⚠"; color: #e74c3c; font-weight: bold; position: absolute; left: 0; }
+        .status { font-weight: bold; text-transform: uppercase; font-size: 0.8em; padding: 2px 6px; border-radius: 3px; }
+        .status-warn { background: #ffeaa7; color: #d35400; }
+        .status-info { background: #dfe6e9; color: #2d3436; }
+        .note { font-size: 0.9em; color: #7f8c8d; font-style: italic; }
+        code { background: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Production Readiness Checklist</h1>
+    <p>This checklist outlines critical and recommended steps before deploying <strong>EventSourcerer</strong> to a production environment.</p>
+
+    <div class="category">
+        <h2>1. Security & Access Control</h2>
+        <ul>
+            <li class="critical"><strong>Restrict Administrative Routes:</strong> Currently, many dashboard and tool routes lack explicit <code>#[IsGranted]</code> attributes. Update <code>security.yaml</code> or add attributes to <code>App\Controller\Tool\All</code>, <code>App\Controller\SimpleServerEvent\*</code>, and other sensitive controllers.</li>
+            <li><strong>Enable App-level CSRF:</strong> Verify all state-changing forms (POST) use Symfony's CSRF protection (mostly enabled by default).</li>
+            <li class="critical"><strong>Production Secrets:</strong> Ensure <code>APP_SECRET</code> and <code>DATABASE_URL</code> are set via environment variables, not hardcoded in <code>.env</code>.</li>
+            <li><strong>SSH Key Rotation:</strong> Establish a policy for rotating the public SSH key used for personal data encryption.</li>
+        </ul>
+    </div>
+
+    <div class="category">
+        <h2>2. Infrastructure & Scalability</h2>
+        <ul>
+            <li class="critical"><strong>Event Loop Optimization:</strong> The socket server is limited by <code>stream_select()</code> (1024 FD limit). Install <code>php-ev</code> or <code>php-uv</code> extension for high-concurrency production use.</li>
+            <li><strong>Persistent Cache:</strong> Switch from <code>cache.adapter.filesystem</code> to <code>cache.adapter.redis</code> in <code>cache.yaml</code> for better performance and shared state between multiple web/worker instances.</li>
+            <li><strong>Doctrine Cache:</strong> Verify <code>when@prod</code> settings in <code>doctrine.yaml</code> use the <code>doctrine.system_cache_pool</code>.</li>
+            <li><strong>Messenger Workers:</strong> Configure <code>async</code> and <code>projections</code> workers as supervised processes (e.g., using Systemd or Supervisor).</li>
+        </ul>
+    </div>
+
+    <div class="category">
+        <h2>3. Stability & Observability</h2>
+        <ul>
+            <li class="critical"><strong>Logging:</strong> Review <code>EncryptPersonalDataHandler</code> and Controllers. Replace generic <code>catch (\Throwable)</code> blocks with proper logging (<code>LoggerInterface</code>) before failing silently or showing generic flashes.</li>
+            <li><strong>SSE Isolation:</strong> The <code>NewEvents</code> SSE controller currently uses a shared cache key for <code>maxSequenceReceived</code>. This should be isolated per session or client to avoid race conditions and incorrect event delivery.</li>
+            <li><strong>Database Indexing:</strong> Ensure <code>stream_event</code> table has optimized indexes on <code>stream_id</code> and <code>sequence</code> (already largely handled by migrations, but worth a final check).</li>
+        </ul>
+    </div>
+
+    <div class="category">
+        <h2>4. Cleanup & Maintenance</h2>
+        <ul>
+            <li><strong>Remove Generate Tools:</strong> Disable or password-protect <code>app:generate:events</code> in production to prevent accidental data flooding.</li>
+            <li><strong>Tombstone Process:</strong> Verify the <code>app:tombstone:events</code> command is scheduled if data retention policies are in place.</li>
+            <li><strong>Unimplemented TODOs:</strong> Address "TODO" markers in <code>src/Repository/Postgres/PostgresNonEncryptedStreamEvents.php</code> and Form types.</li>
+        </ul>
+    </div>
+
+    <p class="note">Generated on: 2026-04-26 06:50</p>
+</body>
+</html>

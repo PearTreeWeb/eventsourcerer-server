@@ -1,0 +1,74 @@
+{% extends 'UI/layout/base.html.twig' %}
+{% form_theme form 'form/main_theme.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Edit Event</h1>
+        <a class="button button-secondary" href="{{ path('events') }}">Back to Events</a>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                {{ form_errors(form) }}
+                {{ form_start(form, {attr: {'data-controller': 'prototype'}}) }}
+                    <div class="mb-5">
+                        {{ form_label(form.name, 'Event Name', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(form.name, { attr: { class: 'form-input' }} ) }}
+                        {{ form_errors(form.name) }}
+                    </div>
+                    <button
+                        class="text-sm cursor-pointer text-emerald-600 hover:text-emerald-800 font-medium block mb-6"
+                        data-action="prototype#addProperty"
+                        data-index="{{ form.properties|length > 0 ? form.properties|length + 1 : 0 }}"
+                        data-collection-holder-class="properties"
+                        data-prototype="{{ form_widget(form.properties.vars.prototype)|e('html_attr') }}"
+                    >+ Add Event Property</button>
+                    <div class="mb-6">
+                        <ul id="properties" data-prototype-target="collectionHolder" class="list-none p-0 m-0">
+                            {% for property in form.properties %}
+                                <li>{{ form_widget(property) }}</li>
+                            {% endfor %}
+                        </ul>
+                        {{ form_errors(form.properties) }}
+                    </div>
+                    <hr class="border-slate-200 mb-6" />
+                    <div class="mb-6">
+                        {{ form_label(form.tombstoneAfter, 'Tombstone After (seconds)', {label_attr: {class: 'form-label'}}) }}
+                        {% include 'UI/_partial/info_box.html.twig' with {
+                            info: 'Set this value to a number greater than 0 if these events should be ignored after n seconds.'
+                        } %}
+                        {{ form_widget(form.tombstoneAfter, { attr: { class: 'form-input mt-3 w-40' }} ) }}
+                        {{ form_errors(form.tombstoneAfter) }}
+                    </div>
+                    <button class="button button-primary" type="submit">Update</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-slate-800">
+                <h2 class="text-lg font-semibold mb-4 text-slate-800">cURL Example</h2>
+                <div class="relative">
+                    <pre class="bg-slate-50 border border-slate-200 text-slate-700 p-4 rounded-lg overflow-x-auto text-sm font-mono leading-relaxed">
+curl -X POST \
+  {{ url('events')|replace({ (path('events')): '/api/events' }) }} \
+  -H 'Authorization: Bearer YOUR_TOKEN_HERE' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "stream": "STREAM_NAME_HERE",
+    "event": "{{ event.name }}",
+    "version": {{ event.version }},
+    "properties": {
+    {% for property in event.properties %}
+      "{{ property.name }}": "{{ property.typeClass|example_input|raw }}"{{ not loop.last ? ',' : '' }}
+    {% endfor %}
+    }
+  }'</pre>
+                </div>
+                <p class="mt-4 text-xs text-slate-500">
+                    Replace <code class="bg-slate-100 text-slate-800 px-1 rounded">STREAM_NAME_HERE</code> with your stream name and <code class="bg-slate-100 text-slate-800 px-1 rounded">YOUR_TOKEN_HERE</code> with a valid bearer token.
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

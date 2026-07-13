@@ -1,0 +1,28 @@
+{% extends 'UI/widget/template.html.twig' %}
+
+{% block title %}
+    {% include 'UI/widget/template_header.html.twig' with {icon: 'fa-brands fa-steam-symbol', name} %}
+{% endblock %}
+
+{% block content %}
+    {% if state|length %}
+        <table class="table-auto text-xs w-full text-slate-400">
+            <tbody>
+            {% for stream in state['recent-streams'] %}
+                <tr class="even:bg-gray-50 hover:bg-gray-200">
+                    <td class="p-2">
+                        <a class="text-purple-400"
+                           data-turbo="false"
+                           data-tippy-target="children"
+                           data-tippy-content="View stream"
+                           href="{{ path('view_stream', {id: stream}) }}"
+                        >{{ stream }}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-sm text-slate-400">A widget showing recently written to streams</p>
+    {% endif %}
+{% endblock %}

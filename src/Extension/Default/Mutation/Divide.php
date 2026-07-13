@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Extension\Default\Mutation;
+
+use App\Domain\Common\Model\PropertyType;
+use App\Domain\Event\Model\EventPropertyValue;
+use App\Domain\Projection\Model\MutationDisplayPart;
+use App\Domain\Projection\Model\MutationLabel;
+use App\Domain\Projection\Model\MutationPreposition;
+use App\Domain\Projection\Model\SystemMutation;
+use App\Extension\Default\PropertyType\Integer;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+
+#[AutoconfigureTag('eventsourcerer.mutation_type')]
+final readonly class Divide extends SystemMutation
+{
+    protected const string LABEL = 'Divide';
+
+    private const array COMPATIBLE_PROPERTY_TYPES = [
+        Integer::class,
+    ];
+
+    public function __construct() {}
+
+    public static function create(): self
+    {
+        return new self();
+    }
+
+    public static function label(): MutationLabel
+    {
+        return MutationLabel::fromString(self::LABEL);
+    }
+
+    public function mutate(EventPropertyValue $eventValue, mixed $currentValue): mixed
+    {
+        return $currentValue / json_decode($eventValue->toString(), false, 512, JSON_THROW_ON_ERROR);
+    }
+
+    public function preposition(): MutationPreposition
+    {
+        return MutationPreposition::BY;
+    }
+
+    public static function displayOrder(): array
+    {
+        return [
+            MutationDisplayPart::Label,
+            MutationDisplayPart::ProjectionProperty,
+            MutationDisplayPart::Preposition,
+            MutationDisplayPart::EventProperty,
+        ];
+    }
+
+    public function compatibleWith(PropertyType $propertyType): bool
+    {
+        return \in_array($propertyType::class, self::COMPATIBLE_PROPERTY_TYPES, true);
+    }
+}

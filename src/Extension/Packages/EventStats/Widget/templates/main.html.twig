@@ -1,0 +1,21 @@
+{% extends 'UI/widget/template.html.twig' %}
+
+{% block title %}
+    {% include 'UI/widget/template_header.html.twig' with {icon: 'fa-square-poll-horizontal', name} %}
+{% endblock %}
+
+{% block content %}
+    <div class="text-sm text-slate-400 min-h-80 relative">
+        {% if not state|length %}
+            A widget showing the number of events that
+            have occurred, grouped by name
+        {% else %}
+            <canvas
+                    class="bg-gray-50 p-4"
+                    data-controller="event-stats"
+                    data-event-stats-name-value="{{ name }}"
+                    data-event-stats-state-value="{{ state['number-of-occurrences']|json_encode }}"
+            ></canvas>
+        {% endif %}
+    </div>
+{% endblock %}

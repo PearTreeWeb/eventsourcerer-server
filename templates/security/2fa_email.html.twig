@@ -1,0 +1,36 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="min-h-[60vh] flex items-center justify-center">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-8 w-full max-w-md">
+            {% if authenticationError %}
+                <div class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+                    <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0"></i>
+                    {{ authenticationError.messageKey|trans(authenticationError.messageData, 'security') }}
+                </div>
+            {% endif %}
+            <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">Two-Factor Authentication</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">A verification code has been sent to your email address. Please enter it below.</p>
+            <form action="{{ path('2fa_login_check') }}" method="post">
+                <div class="mb-6">
+                    <label class="form-label" for="auth_code">Verification Code</label>
+                    <input type="text"
+                           id="auth_code"
+                           name="_auth_code"
+                           class="form-input w-full text-center text-lg tracking-widest"
+                           autocomplete="one-time-code"
+                           autofocus
+                           placeholder="000000">
+                </div>
+                {% if isCsrfProtectionEnabled %}
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('2fa') }}">
+                {% endif %}
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="button button-primary">Verify</button>
+                    <a class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"
+                       href="{{ path('app_logout') }}">Cancel &amp; Logout</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

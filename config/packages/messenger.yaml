@@ -1,0 +1,33 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    use_notify: true
+                    check_delayed_interval: 60000
+                retry_strategy:
+                    max_retries: 3
+                    multiplier: 2
+            projections:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    use_notify: true
+                    check_delayed_interval: 60000
+                retry_strategy:
+                    delay: 1000
+                    multiplier: 2
+                    max_delay: 10000
+            failed: 'doctrine://default?queue_name=failed'
+            # sync: 'sync://'
+
+        routing:
+            App\Domain\Common\Command\BroadcastEvent: async
+            App\Domain\Tool\Command\EncryptPersonalData: async
+
+            App\Domain\Client\Command\UpdateProjections: projections
+            App\Domain\Projection\Command\RunProjectionMutation: projections
+            App\Domain\Projection\Command\ResetProjection: projections

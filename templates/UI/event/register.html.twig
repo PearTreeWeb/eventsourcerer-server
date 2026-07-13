@@ -1,0 +1,49 @@
+{% extends 'UI/layout/base.html.twig' %}
+{% form_theme form 'form/main_theme.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Create Event</h1>
+        <a class="button button-secondary" href="{{ path('events') }}">Back to Events</a>
+    </div>
+    <div class="mb-6">
+        {% include 'UI/_partial/info_box.html.twig' with {
+            info: 'Use Events to define an actions which happened inside or outside of your application, for example "user-signed-up", "item-dispatched-from-warehouse".'
+        } %}
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-2xl">
+        {{ form_errors(form) }}
+        {{ form_start(form, {attr: {'data-controller': 'prototype'}}) }}
+            <div class="mb-5">
+                {{ form_label(form.name, 'Event Name', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.name, { attr: { class: 'form-input' }} ) }}
+                {{ form_errors(form.name) }}
+            </div>
+            <a
+                class="text-sm cursor-pointer text-emerald-600 hover:text-emerald-800 font-medium block mb-6"
+                data-action="prototype#addProperty"
+                data-index="{{ form.properties|length > 0 ? form.properties|length + 1 : 0 }}"
+                data-collection-holder-class="properties"
+                data-prototype="{{ form_widget(form.properties.vars.prototype)|e('html_attr') }}"
+            >+ Add Event Property</a>
+            <div class="mb-6">
+                <ul id="properties" data-prototype-target="collectionHolder" class="list-none p-0 m-0">
+                    {% for property in form.properties %}
+                        <li>{{ form_widget(property) }}</li>
+                    {% endfor %}
+                </ul>
+                {{ form_errors(form.properties) }}
+            </div>
+            <hr class="border-slate-200 mb-6" />
+            <div class="mb-6">
+                {{ form_label(form.tombstoneAfter, 'Tombstone After (seconds)', {label_attr: {class: 'form-label'}}) }}
+                {% include 'UI/_partial/info_box.html.twig' with {
+                    info: 'Set this value to a number greater than 0 if these events should be ignored after n seconds.'
+                } %}
+                {{ form_widget(form.tombstoneAfter, { attr: { class: 'form-input mt-3 w-40' }} ) }}
+                {{ form_errors(form.tombstoneAfter) }}
+            </div>
+            <button class="button button-primary" type="submit">Save</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

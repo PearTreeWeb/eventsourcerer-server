@@ -1,0 +1,62 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Applications</h1>
+        <div class="flex items-center gap-3">
+            <a class="button button-secondary" href="{{ path('download_certificate_authority_certificate') }}">Download CA certificate</a>
+            <a class="button button-primary" href="{{ path('register_application') }}">Register Application</a>
+        </div>
+    </div>
+
+    <div class="mb-6">
+        <twig:Alert type="info" message="Download the Certificate Authority certificate to connect applications securely"></twig:Alert>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th class="w-2/5">ID</th>
+                <th class="w-1/5">Name</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for application in applications %}
+                <tr>
+                    <td class="font-mono text-xs">
+                        <span>{{ application.id }}</span>
+                        <button type="button"
+                                class="ml-4 hover:text-emerald-600 transition-colors cursor-pointer"
+                                data-controller="clipboard"
+                                data-clipboard-value-param="{{ application.id }}"
+                                data-action="clipboard#copy"
+                                data-tippy-target="children"
+                                data-tippy-content="Copy ID">
+                            <i class="fa-regular fa-clipboard"></i>
+                        </button>
+                    </td>
+                    <td class="font-medium text-slate-700">{{ application.name }}</td>
+                    <td class="text-right">
+                        <div class="flex items-center justify-end gap-4">
+                            <a class="hover:text-emerald-600 transition-colors"
+                               data-tippy-target="children"
+                               data-tippy-content="Edit Application"
+                               href="{{ path('edit_application', {id: application.id}) }}">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <a class="hover:text-slate-600 transition-colors"
+                               data-tippy-target="children"
+                               data-tippy-content="Checkpoints"
+                               href="{{ path('manage_application_checkpoints', {id: application.id}) }}">
+                                <i class="fa-solid fa-stopwatch-20"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

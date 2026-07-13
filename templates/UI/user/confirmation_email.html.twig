@@ -1,0 +1,9 @@
+{% set url = absolute_url(path('app_reset_password', {token})) %}
+
+<h1>Welcome to EventSourcerer!</h1>
+
+<p>A new EventSourcerer user account has been created for you.</p>
+<p>You will need to change your password before logging in for the first time.</p>
+<p>Please follow this link to reset your password <a href="{{ url }}">{{ url }}</a></p>
+
+<p>Thanks</p>

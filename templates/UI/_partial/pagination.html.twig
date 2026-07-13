@@ -1,0 +1,27 @@
+{% set adjacentLinks = 5 %}
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set firstLink    = pages > 0 ? max(currentPage - adjacentLinks, 1) : 1 %}
+{% set lastLink     = pages > 0 ? min(firstLink + (adjacentLinks * 2), pages) : 1 %}
+{% set routeParams  = app.request.attributes.get('_route_params') %}
+
+<div class="flex justify-end px-4 py-3 border-t border-slate-100">
+    <ul class="inline-flex items-center gap-1 text-sm list-none p-0 m-0">
+        {% if pages > 0 and currentPage != 1 %}
+            <li><a href="{{ path(currentRoute, routeParams|merge({page: 1})) }}" class="flex items-center justify-center w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100 transition-colors">&laquo;</a></li>
+            <li><a href="{{ path(currentRoute, routeParams|merge({page: currentPage - 1})) }}" class="flex items-center justify-center w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100 transition-colors">&lsaquo;</a></li>
+        {% endif %}
+
+        {% for i in firstLink..lastLink %}
+            <li>
+                <a href="{{ path(currentRoute, routeParams|merge({page: i})) }}"
+                   class="flex items-center justify-center w-8 h-8 rounded-md transition-colors {% if currentPage == i %}bg-emerald-600 text-white font-semibold{% else %}text-slate-500 hover:bg-slate-100{% endif %}"
+                >{{ i }}</a>
+            </li>
+        {% endfor %}
+
+        {% if pages > 0 and currentPage != pages %}
+            <li><a href="{{ path(currentRoute, routeParams|merge({page: currentPage + 1})) }}" class="flex items-center justify-center w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100 transition-colors">&rsaquo;</a></li>
+            <li><a href="{{ path(currentRoute, routeParams|merge({page: pages})) }}" class="flex items-center justify-center w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100 transition-colors">&raquo;</a></li>
+        {% endif %}
+    </ul>
+</div>

@@ -1,0 +1,32 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="min-h-[60vh] flex items-center justify-center">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8 w-full max-w-md">
+            {% if error %}
+                <div class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">
+                    <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0"></i>
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+            <h1 class="text-xl font-semibold text-slate-800 mb-6">Login</h1>
+            <form action="{{ path('app_login') }}" method="post">
+                <div class="mb-4">
+                    <label class="form-label" for="username">Email</label>
+                    <input name="_username" class="form-input w-full" id="username" type="text" placeholder="user@someprovider.com" value="{{ last_username }}">
+                </div>
+                <div class="mb-6">
+                    <label class="form-label" for="password">Password</label>
+                    <input id="password" type="password" name="_password" class="form-input w-full">
+                </div>
+                <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+                <input type="hidden" name="_target_path" value="{{ path('dashboard') }}">
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="button button-primary">Login</button>
+                    <a class="text-sm text-emerald-600 hover:text-emerald-800 font-medium"
+                       href="{{ path('app_forgot_password_request') }}">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

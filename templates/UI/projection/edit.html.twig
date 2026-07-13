@@ -1,0 +1,165 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    {% set isSuperUser = is_granted('ROLE_SUPER_USER') %}
+
+    <h1 class="m-4"><span class="font-bold">Edit Projection</span> <span class="text-gray-500">{{ projection.name }}</span></h1>
+
+    <div class="flex flex-col md:flex-row md:space-x-24 w-full">
+        {% if isSuperUser %}
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-3xl">
+        {{ form_start(form, {attr: {'data-controller': 'prototype'}}) }}
+        <div class="space-y-4">
+            <div class="flex flex-row items-center">
+                {{ form_label(form.projectionName, null, {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.projectionName, { attr: { class: 'form-input w-full' }} ) }}
+                    {{ form_errors(form.projectionName) }}
+                </div>
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.continuous, 'Continuous', {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex items-center h-5">
+                    {{ form_widget(form.continuous, { attr: { class: 'w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500' }}) }}
+                </div>
+                {{ form_errors(form.continuous) }}
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.partition, 'Partition by stream ID', {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex items-center h-5">
+                    {{ form_widget(form.partition, { attr: { class: 'w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500' }}) }}
+                </div>
+                {{ form_errors(form.partition) }}
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.exposeStateViaApi, 'Expose state via API', {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex items-center h-5">
+                    {{ form_widget(form.exposeStateViaApi, { attr: { class: 'w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500' }}) }}
+                </div>
+                {{ form_errors(form.exposeStateViaApi) }}
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.startDate, null, {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.startDate, {attr: {class: 'form-input w-full text-sm'}}) }}
+                    {{ form_errors(form.startDate) }}
+                </div>
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.endDate, null, {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.endDate, {attr: {class: 'form-input w-full text-sm'}}) }}
+                    {{ form_errors(form.endDate) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Projection Properties</h3>
+                <a
+                    class="text-xs cursor-pointer text-emerald-600 hover:text-emerald-800 font-medium flex items-center gap-1"
+                    data-action="prototype#addProperty"
+                    data-index="{{ form.properties|length + 1 }}"
+                    data-collection-holder-class="properties"
+                    data-prototype="{{ form_widget(form.properties.vars.prototype)|e('html_attr') }}"
+                >
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    Add Property
+                </a>
+            </div>
+
+            <ul id="properties" data-prototype-target="collectionHolder" class="space-y-3 list-none p-0 m-0">
+                {% for property in form.properties %}
+                    <li>{{ form_widget(property) }}</li>
+                {% endfor %}
+            </ul>
+            {{ form_errors(form.properties) }}
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <button type="submit" class="button button-primary px-8">Save Changes</button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+        {% endif %}
+
+        <div class="w-full {{ isSuperUser ? 'lg:w-2/5' : '' }} md:p-4">
+            <div
+                class="flex justify-between space-x-4"
+                data-controller="projection-condition"
+                data-projection-condition-listen-to-value="{{ path('simple_server_events_for_projection_condition', {id: projection.id.toString}) }}"
+                data-projection-condition-resetting-text-value="{{ enum('App\\Domain\\Projection\\Model\\ProjectionCondition').Resetting.value }}"
+                data-projection-condition-running-text-value="{{ enum('App\\Domain\\Projection\\Model\\ProjectionCondition').Running.value }}"
+                data-projection-condition-failed-text-value="{{ enum('App\\Domain\\Projection\\Model\\ProjectionCondition').Failed.value }}"
+                data-projection-condition-finished-text-value="{{ enum('App\\Domain\\Projection\\Model\\ProjectionCondition').Finished.value }}"
+            >
+                <h1 class="font-bold mb-4 ml-6">Current Projection State</h1>
+                <div class="mb-10">
+                    <table class="table-auto border-spacing-2 p-1 border border-slate-700 rounded mb-5">
+                        <tbody>
+                            <tr>
+                                <td class="p-2 font-bold text-xs">Condition</td>
+                                <td class="p-2 font-bold text-xs " data-projection-condition-target="condition"></td>
+                            </tr>
+                            <tr class="bg-slate-100">
+                                <td class="p-2 font-bold text-xs dark:text-slate-600">No. of applicable events</td>
+                                <td class="p-2 text-xs dark:text-slate-600" data-projection-condition-target="maxApplicableAllSequence"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 text-xs font-bold ">Processed</td>
+                                <td class="p-2 text-xs " data-projection-condition-target="processedUpToAllSequence"></td>
+                            </tr>
+                            <tr class="bg-slate-100">
+                                <td class="p-2 text-xs font-bold dark:text-slate-600">Progress</td>
+                                <td class="p-2 text-xs dark:text-slate-600" data-projection-condition-target="percentageComplete"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {% if projection.condition is same as(enum('App\\Domain\\Projection\\Model\\ProjectionCondition').Failed.value) %}
+                        <a href="{{ path('revive_projection', {id: projection.id}) }}" class="button button-primary w-full block">Revive Projection</a>
+                    {% endif %}
+                </div>
+            </div>
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th class="px-6 py-3">Property</th>
+                        <th class="px-6 py-3">Value</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    {% for currentStatePropertyKey, currentStateProperty in currentState %}
+                        {% if currentStatePropertyKey is not same as('partitionedResults') %}
+                            <tr>
+                                <td class="px-6 py-4">{{ currentStatePropertyKey }}</td>
+                                <td class="px-6 py-4">
+                                    {% if currentStateProperty is iterable %}
+                                        <ul class="list-none">
+                                            {% for item in currentStateProperty %}
+                                                <li>{{ item }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% elseif currentStateProperty matches '/^\\d+$/' %}
+                                        {{ currentStateProperty|number_format }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if projection.isPartitioned %}
+                <twig:ProjectionPartition projectionId="{{ projection.idAsString }}"/>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

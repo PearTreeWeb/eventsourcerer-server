@@ -1,0 +1,276 @@
+{% block form_errors -%}
+    {% if errors|length > 0 -%}
+        <div class="rounded-sm bg-red-400 p-2 my-2 text-white mb-2 dark:text-slate-600">
+            <ul class="list-none m-0 p-0 text-sm">
+                {% for error in errors %}
+                    <li>{{ error.message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {%- endif %}
+{%- endblock form_errors %}
+
+{% block condition_group_type_widget %}
+    <div class="rounded-xl border border-slate-200 my-6 bg-white shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
+        <div class="bg-slate-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center dark:bg-slate-800/50 dark:border-slate-700">
+            <div class="flex items-center gap-4 flex-grow">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Match</span>
+                {{ form_widget(form.conditionGroupType, {attr: {class: 'form-input py-1'}, label: false}) }}
+            </div>
+
+            {% if not form.vars.disabled %}
+                {% if form.vars.value and form.vars.value.projectionMutation is defined and form.vars.value.projectionMutation %}
+                    {% set projectionMutation = form.vars.value.projectionMutation %}
+                    <a href="{{ path('delete_projection_conditions_group', {
+                        id: form.vars.value.id,
+                        projectionMutationId: projectionMutation.id.toString,
+                    }) }}"
+                       class="text-slate-400 hover:text-red-600 transition-colors p-1"
+                       data-tippy-content="Delete Group"
+                       data-tippy-target="children"
+                       data-turbo-method="delete"
+                       data-turbo-confirm="Are you sure you want to delete this group and all its conditions?"
+                    >
+                        <i class="fa-regular fa-trash-can"></i>
+                    </a>
+                {% else %}
+                    <a class="text-slate-400 hover:text-red-600 transition-colors p-1 cursor-pointer"
+                       data-tippy-content="Delete Group"
+                       data-tippy-target="children"
+                       data-action="prototype#removeProperty"
+                    >
+                        <i class="fa-regular fa-trash-can"></i>
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="p-6">
+            {{ form_widget(form.group, {label: false}) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block condition_groups_type_widget %}
+    <div class="mb-4"
+         data-controller="prototype"
+         data-index="{{ form|length > 0 ? form|last.vars.name + 1 : 0 }}"
+         data-collection-holder-class="{{ form.vars.id }}"
+         data-prototype="{{ form_widget(form.vars.prototype, {label: false})|e('html_attr') }}"
+    >
+        <div class="flex justify-between items-center mb-4">
+            <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Condition Groups</h4>
+            <a class="button button-secondary text-xs"
+               data-action="prototype#addProperty"
+            >
+                <i class="fa-solid fa-plus mr-1"></i> Add Condition Group
+            </a>
+        </div>
+        <ul id="{{ form.vars.id }}" data-prototype-target="collectionHolder" class="list-none p-0 m-0">
+            {% for child in form %}
+                <li>{{ form_widget(child, {label: false}) }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block condition_groups_type_label %}
+{% endblock %}
+
+{% block condition_group_conditions_type_widget %}
+    <div class="mb-2"
+         data-controller="prototype"
+         data-index="{{ form|length > 0 ? form|last.vars.name + 1 : 0 }}"
+         data-collection-holder-class="{{ form.vars.id }}"
+         data-prototype="{{ form_widget(form.vars.prototype, {label: false})|e('html_attr') }}"
+    >
+        <div class="flex justify-between items-center mb-4">
+            <h5 class="text-xs font-medium text-slate-500 uppercase tracking-wider dark:text-slate-400">Conditions</h5>
+            <a class="button button-secondary py-1 px-2 text-xs"
+               data-action="prototype#addProperty"
+            >
+                <i class="fa-solid fa-plus mr-1"></i> Add Condition
+            </a>
+        </div>
+        <ul id="{{ form.vars.id }}" data-prototype-target="collectionHolder" class="space-y-3 list-none p-0 m-0">
+            {% for child in form %}
+                <li>{{ form_widget(child, {label: false}) }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block condition_group_type_label %}
+{% endblock %}
+
+{% block condition_group_and_or_type_label %}
+{% endblock %}
+
+{% block condition_group_conditions_type_label %}
+{% endblock %}
+
+{% block condition_type_widget %}
+    <div class="flex items-center gap-3 text-sm p-3 pb-8 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-900/50 dark:border-slate-700"
+         data-controller="condition-parameters"
+         data-condition-parameters-prototype-value="{{ form_widget(form.parameterValues.vars.prototype, {attr: {class: 'form-input py-1 text-xs'}, label: false})|e('html_attr') }}"
+    >
+        <span class="text-slate-500 font-medium whitespace-nowrap">When value</span>
+        {{ form_widget(form.condition, {attr: {
+            'data-condition-parameters-target': 'select',
+            'data-action': 'change->condition-parameters#updateParameters',
+            'class': 'form-input py-1'
+        }, label: false}) }}
+
+        <div id="{{ form.parameterValues.vars.id }}"
+             data-condition-parameters-target="holder"
+             class="flex items-center gap-2 flex-wrap min-h-[34px]"
+        >
+            {% for parameterValue in form.parameterValues %}
+                <div data-parameter-index="{{ loop.index0 }}">
+                    <input type="hidden" value="{{ parameterValue.vars.value is iterable ? parameterValue.vars.value|json_encode : parameterValue.vars.value }}" data-initial-value>
+                    {% if parameterValue.vars.errors|length > 0 %}
+                        <div class="hidden" data-errors>
+                            {% for error in parameterValue.vars.errors %}
+                                <div>{{ error.message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {{ form_errors(form.parameterValues) }}
+        </div>
+
+        <div class="flex-grow"></div>
+
+        {% if not form.vars.disabled %}
+            {% if form.vars.value and form.vars.value.conditionsGroup is defined and form.vars.value.conditionsGroup and form.vars.value.conditionsGroup.projectionMutation is defined and form.vars.value.conditionsGroup.projectionMutation %}
+                <a href="{{ path('delete_projection_condition', {projectionId: form.vars.value.conditionsGroup.projectionMutation.projectionId.toString, id: form.vars.value.id}) }}"
+                   class="text-slate-400 hover:text-red-600 transition-colors p-1"
+                   data-tippy-content="Delete Condition"
+                   data-tippy-target="children"
+                   data-turbo-method="delete"
+                   data-turbo-confirm="Are you sure you want to delete this condition?"
+                >
+                    <i class="fa-regular fa-trash-can"></i>
+                </a>
+            {% else %}
+                <a class="text-slate-400 hover:text-red-600 transition-colors p-1 cursor-pointer"
+                   data-tippy-content="Delete Condition"
+                   data-tippy-target="children"
+                   data-action="prototype#removeProperty"
+                >
+                    <i class="fa-regular fa-trash-can"></i>
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block condition_type_label %}
+{% endblock %}
+
+{% block add_event_properties_widget %}
+    {% if form.parent.parent.vars.value.projectionId is defined and form.parent.vars.id is same as('edit_projection_properties') %}
+        {% set type      = 'projection' %}
+        {% set removeUrl = '/dashboard/projection/property/' ~ form.id.vars.value ~ '/delete' %}
+    {% else %}
+        {% set type = 'event' %}
+        {% set removeUrl = '' %}
+    {% endif %}
+
+    <div class="border-slate-200 border rounded-xl bg-slate-50 dark:bg-slate-800/50 my-4 p-5 w-full flex items-start gap-4">
+        <div class="flex-grow space-y-4">
+            <div class="flex items-center" data-controller="create-event-template">
+                {{ form_label(form.name, null, {label_attr: {class: 'form-label mb-0 w-32 shrink-0'}}) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.name, {attr: {
+                        'data-create-event-template-target': 'input',
+                        'data-action': 'create-event-template#formatName',
+                        'class': 'form-input w-full'
+                    }}) }}
+                    {{ form_errors(form.name) }}
+                </div>
+            </div>
+            <div class="flex items-center">
+                {{ form_label(form.type, null, {label_attr: {class: 'form-label mb-0 w-32 shrink-0'}}) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.type, {attr: {class: 'form-input w-full'}}) }}
+                    {{ form_errors(form.type) }}
+                </div>
+            </div>
+            {% if form.containsPersonalData is defined %}
+                <div class="flex items-center">
+                    {{ form_label(form.containsPersonalData, null, {label_attr: {class: 'form-label mb-0 w-32 shrink-0'}}) }}
+                    <div class="flex items-center h-5">
+                        {{ form_widget(form.containsPersonalData, { attr: { class: 'w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500' }}) }}
+                    </div>
+                    {{ form_errors(form.containsPersonalData) }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="flex flex-col gap-3 pt-1">
+            {% if type is same as('projection') %}
+                <a href="/dashboard/projection/{{ form.parent.parent.vars.value.projectionId.toString }}/mutations/{{ form.id.vars.value }}/define"
+                   class="text-slate-400 hover:text-emerald-600 transition-colors"
+                   data-tippy-content="Set mutations"
+                   data-tippy-target="children"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </a>
+            {% endif %}
+
+            {% if not form.vars.disabled %}
+                {% if type is same as('projection') and form.vars.value is not null %}
+                    <a href="{{ removeUrl }}"
+                       class="text-slate-400 hover:text-red-600 transition-colors"
+                       data-tippy-content="Delete"
+                       data-tippy-target="children"
+                       data-turbo-method="get"
+                       data-turbo-confirm="Are you sure you want to delete the {{ type }} property?"
+                    >
+                        <i data-index="__name__"
+                           class="cursor-pointer fa-regular fa-trash-can"
+                        ></i>
+                    </a>
+                {% else %}
+                    <a class="text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                       data-tippy-content="Delete"
+                       data-tippy-target="children"
+                       data-action="prototype#removeProperty"
+                    >
+                        <i data-index="__name__"
+                           class="fa-regular fa-trash-can"
+                        ></i>
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    {{ form_widget(form.id) }}
+{% endblock %}
+
+{% block add_event_properties_label %}
+    {# don't show label #}
+{% endblock %}
+
+{% block add_event_properties_name_label %}
+    <label class="form-label mb-0 w-32 shrink-0">{{ form.vars.name|capitalize }}</label>
+{% endblock %}
+
+{% block add_event_properties_name_widget %}
+    {{ form_widget(form) }}
+{% endblock %}
+
+{% block add_event_properties_type_label %}
+    <label class="form-label mb-0 w-32 shrink-0">{{ form.vars.name|capitalize }}</label>
+{% endblock %}
+
+{% block add_event_properties_personal_data_label %}
+    <label class="form-label mb-0 w-32 shrink-0">{{ form.vars.label }}</label>
+{% endblock %}
+
+{% block add_event_properties_type_widget %}
+    {{ form_widget(form) }}
+{% endblock %}
+

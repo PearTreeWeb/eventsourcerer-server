@@ -1,0 +1,31 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    <div class="p-4">
+        <h1 class="font-bold my-4">Register</h1>
+
+        {{ form_errors(registrationForm) }}
+
+        {{ form_start(registrationForm) }}
+            <div class="my-5">
+                {{ form_label(registrationForm.user.email, null, { label_attr: { class: 'block text-sm text-gray-600 mb-2 text-sm' }}) }}
+                {{ form_widget(registrationForm.user.email, {attr: {class: 'w-1/2 border-2 rounded-sm p-2 text-sm'}} ) }}
+                {{ form_errors(registrationForm.user.email) }}
+            </div>
+
+            <div class="mb-5">
+                {{ form_label(registrationForm.user.role, null, { label_attr: { class: 'block text-sm text-gray-600 mb-2 text-sm' }}) }}
+                {{ form_widget(registrationForm.user.role, {attr: {class: 'w-1/2 border-2 rounded-sm p-2 text-sm'}} ) }}
+                {{ form_errors(registrationForm.user.role) }}
+            </div>
+
+            <input type="hidden" name="_token" value="{{ csrf_token('_token') }}">
+
+            <button type="submit" class="button button-primary">Continue</button>
+        {{ form_end(registrationForm) }}
+    </div>
+{% endblock %}

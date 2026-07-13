@@ -1,0 +1,149 @@
+<html>
+<head>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true' || (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    <title>EventSourcerer - {{ app.current_route|trans({}, 'routes') }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="stylesheet" href="{{ asset('styles/fontawesome/css/all.min.css') }}">
+    {% block importmap %}
+    {{ importmap(['app']) }}
+{% endblock %}
+</head>
+<body data-controller="tippy dark-mode">
+    <div data-controller="nav">
+        <div class="bg-slate-900 text-white px-6 py-3 flex justify-between items-center">
+            <a href="{{ path('dashboard') }}">
+                <svg class="w-30" viewBox="0 0 680 240" role="img" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="glow-v" x="-50%" y="-40%" width="200%" height="180%">
+                            <feGaussianBlur stdDeviation="6" result="b1"/>
+                            <feGaussianBlur stdDeviation="16" result="b2"/>
+                            <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                        <filter id="glow-t" x="-50%" y="-40%" width="200%" height="180%">
+                            <feGaussianBlur stdDeviation="6" result="b1"/>
+                            <feGaussianBlur stdDeviation="16" result="b2"/>
+                            <feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+
+
+                    <text x="90" y="190" text-anchor="middle"
+                          font-family="'Arial Black', 'Impact', sans-serif"
+                          font-weight="900" font-size="180"
+                          fill="#c4a8ff" filter="url(#glow-v)">E</text>
+
+                    <text x="230" y="190" text-anchor="middle"
+                          font-family="'Arial Black', 'Impact', sans-serif"
+                          font-weight="900" font-size="180"
+                          fill="#4dffd2" filter="url(#glow-t)">S</text>
+                </svg>
+            </a>
+            <div class="lg:hidden">
+                <a data-action="nav#toggle" class="cursor-pointer text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </a>
+            </div>
+        </div>
+        <div data-nav-target="nav" class="hidden bg-white dark:bg-slate-800 dark:border-slate-700 lg:flex justify-between items-center border-b border-slate-200 px-4 shadow-sm">
+            <nav class="lg:flex lg:items-center">
+                <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('dashboard') }}">
+                    <i class="fa-solid fa-table-columns text-slate-400 text-xs"></i>
+                    <span>Dashboard</span>
+                </a>
+                {% if is_granted('ROLE_USER') %}
+                    <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('events') }}">
+                        <i class="fa-solid fa-calendar text-slate-400 text-xs"></i>
+                        <span>Events</span>
+                    </a>
+                    <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('streams') }}">
+                        <i class="fa-brands fa-steam-symbol text-slate-400 text-xs"></i>
+                        <span>Streams</span>
+                    </a>
+                {% endif %}
+                {% if is_granted('ROLE_SUPER_USER') %}
+                    <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('applications') }}">
+                        <i class="fa-solid fa-code text-slate-400 text-xs"></i>
+                        <span>Applications</span>
+                    </a>
+                {% endif %}
+                {% if is_granted('ROLE_USER') %}
+                    <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('projections') }}">
+                        <i class="fa-solid fa-camera-retro text-slate-400 text-xs"></i>
+                        <span>Projections</span>
+                    </a>
+                {% endif %}
+                {% if is_granted('ROLE_SUPER_USER') %}
+                    <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('users') }}">
+                        <i class="fa-solid fa-user text-slate-400 text-xs"></i>
+                        <span>Users</span>
+                    </a>
+                    <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('error-management') }}">
+                        <i class="fa-solid fa-bug text-slate-400 text-xs"></i>
+                        <span>Errors</span>
+                    </a>
+                    <div class="relative"
+                         data-action="mouseenter->nav#openSubmenu mouseleave->nav#closeSubmenu">
+                        <button class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors w-full lg:w-auto"
+                                data-action="click->nav#toggleSubmenu">
+                            <i class="fa-solid fa-gear text-slate-400 text-xs"></i>
+                            <span>Settings</span>
+                            <i class="fa-solid fa-chevron-down text-slate-400 text-xs ml-1"></i>
+                        </button>
+                        <div data-nav-target="submenu"
+                             class="hidden lg:absolute lg:left-0 lg:top-full lg:z-50 lg:min-w-44 lg:bg-white dark:lg:bg-slate-800 lg:border lg:border-slate-200 dark:lg:border-slate-700 lg:rounded-lg lg:shadow-lg lg:py-1 bg-slate-50 dark:bg-slate-800 pl-4 lg:pl-0">
+                            <a class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 lg:hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 transition-colors"
+                               href="{{ path('settings_general') }}">
+                                <i class="fa-solid fa-key text-slate-400 text-xs"></i>
+                                <span>General</span>
+                            </a>
+                            <a class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 transition-colors"
+                               href="{{ path('settings_packages') }}">
+                                <i class="fa-solid fa-puzzle-piece text-slate-400 text-xs"></i>
+                                <span>Packages</span>
+                            </a>
+                        </div>
+                    </div>
+                    <a class="flex items-center gap-2 px-3 py-3.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 rounded-md transition-colors" href="{{ path('tools') }}">
+                        <i class="fa-solid fa-screwdriver-wrench text-slate-400 text-xs"></i>
+                        <span>Tools</span>
+                    </a>
+                {% endif %}
+            </nav>
+            <div class="flex items-center gap-4">
+                {% if app.user %}
+                    <div class="flex items-center gap-4 py-2 text-sm text-slate-500 dark:text-slate-400">
+                        <span>{{ app.user.email }}</span>
+                        <a class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 transition-colors" data-turbo-prefetch="false" href="{{ path('app_logout') }}">Logout</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="max-w-screen-2xl mx-auto px-6 py-6">
+        {% for message in app.flashes('success') %}
+            <div class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg px-4 py-3 mb-6 shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+                <div class="text-sm">{{ message|trans({}, 'flash') }}</div>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('warning') %}
+            <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-4 py-3 mb-6 shadow-sm" role="alert">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5 shrink-0"></i>
+                <div class="text-sm">{{ message|trans({}, 'flash') }}</div>
+            </div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+
+        <button data-action="dark-mode#toggle"
+                class="fixed bottom-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 shadow-md transition-colors"
+                title="Toggle dark mode">
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:inline"></i>
+        </button>
+    </div>
+</body>
+</html>

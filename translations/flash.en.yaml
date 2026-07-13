@@ -1,0 +1,25 @@
+application_certificate_successfully_updated: The Application Certificate has been successfully updated
+application_certificate_update_failed: An error occurred whilst attempting to update the Application Certificate. Please check file permissions.
+application_registered_successfully: The Application has been successfully registered
+application_stream_checkpoint_updated_successfully: The Application Stream Checkpoint has been successfully updated
+application_updated_successfully: The Application has been updated successfully
+conditions_group_deletion_failed:  An error occurred whilst attempting to delete the Conditions Group
+conditions_group_deleted_successfully: The Conditions Group was deleted successfully
+event_excluded_from_projections: This new version is not automatically added to any projections
+event_registered_successfully: The Event has been successfully registered
+event_updated_successfully: The Event has been successfully updated
+mutation_condition_deleted_successfully: The mutation condition has been successfully deleted
+mutation_condition_deletion_failed: An error occurred whilst attempting to delete the mutation condition
+personal_data_encrypted: All personal data from before the requested data has been encrypted
+personal_data_not_encrypted: An error occurred whilst attempting to encrypt the personal data. Please ensure your public SSH key has been set correctly
+projection_deleted_successfully: The Projection has been successfully deleted
+projection_registered_successfully: The State has been successfully registered
+projection_update_succeeded: The Projection is resetting
+settings_updated_successfully: Settings have been successfully updated
+state_edited_successfully: The State has been successfully updated
+user_registered_successfully: You have successfully registered
+user_updated_successfully: User details have successfully been updated
+projection_updated_successfully: Projection updated
+user_password_updated_successfully: Your password has been updated
+user_deleted_successfully: The user has successfully been deleted
+user_deletion_failed: An error occurred whilst attempting to delete the user

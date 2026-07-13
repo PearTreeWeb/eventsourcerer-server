@@ -1,0 +1,21 @@
+{% block create %}
+    <turbo-stream action="append" target="connections">
+        <template>
+            <div id="{{ 'connection_' ~ id }}">
+                #{{ id }} created
+            </div>
+        </template>
+    </turbo-stream>
+{% endblock %}
+
+{% block update %}
+    <turbo-stream action="update" target="connection_{{ id }}">
+        <template>
+            #{{ id }} updated
+        </template>
+    </turbo-stream>
+{% endblock %}
+
+{% block remove %}
+    <turbo-stream action="remove" target="connection_{{ id }}"></turbo-stream>
+{% endblock %}

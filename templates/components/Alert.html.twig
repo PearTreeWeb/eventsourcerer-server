@@ -1,0 +1,18 @@
+{% set alert = cva({
+    variants: {
+        type: {
+            warning: 'bg-amber-100 text-amber-600',
+            info: 'bg-slate-100 text-slate-600',
+            success: 'bg-green-100 text-green-600',
+        }
+    }
+}) %}
+
+<div class="{{ alert.apply({type}, attributes.render('class'))|tailwind_merge }} w-full flex items-center text-sm font-semibold p-3 rounded-sm" role="alert">
+    {% if type is same as('info') %}
+        <div class="float-left bg-slate-200 p-4 rounded mr-4">
+            <i class="fa-solid fa-info"></i>
+        </div>
+    {% endif %}
+    {{ message|raw }}
+</div>

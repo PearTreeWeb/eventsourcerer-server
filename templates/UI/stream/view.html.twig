@@ -1,0 +1,77 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    {% set listenToStream = id is same as('*') ? 'all' : id %}
+    {% set maxSequence = 0 %}
+    {% for event in events %}
+        {% set maxSequence = isAllStream ? (event.allSequence > maxSequence ? event.allSequence : maxSequence) : (event.sequence > maxSequence ? event.sequence : maxSequence) %}
+    {% endfor %}
+
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Stream <span class="text-slate-400 font-normal">{{ id }}</span></h1>
+        <a class="button button-secondary" href="{{ path('streams') }}">Back to Streams</a>
+    </div>
+
+    <div data-controller="new-events-listener"
+         class="modal-listener"
+         data-new-events-listener-listen-to-value="{{ path('simple_server_events_for_new_events', {id: listenToStream, start: maxSequence}) }}"
+    ></div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+         data-controller="modal"
+         data-modal-new-events-listener-outlet=".modal-listener"
+    >
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Event Number</th>
+                <th>{% if (isAllStream) %}Individual Stream Position{% endif %}</th>
+                <th>Stream</th>
+                <th>Name</th>
+                <th>Event Occurred</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for event in events %}
+                <tr>
+                    <td class="font-mono text-xs">{{ isAllStream ? event.allSequence : event.sequence }}</td>
+                    <td class="font-mono text-xs">{% if (isAllStream) %}{{ event.sequence }}{% endif %}</td>
+                    <td class="text-xs">{{ event.streamId }}</td>
+                    <td>
+                        <span data-action="click->modal#show" class="cursor-pointer text-emerald-600 hover:text-emerald-800 font-medium">{{ event.name }}</span>
+                        <span class="text-slate-400 text-xs ml-1">({{ event.eventVersion }})</span>
+                    </td>
+                    <td class="text-xs text-slate-400">{{ event.createdAt|date('jS M Y H:i:s') }}</td>
+                    <td class="text-right">
+                        <dialog data-modal-target="dialog" class="w-1/2 rounded-xl">
+                            <div class="mb-4 font-semibold text-slate-700">Event Properties</div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Property Name</th>
+                                        <th>Property Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for property in event.properties %}
+                                        <tr>
+                                            <td class="font-medium text-slate-700">{{ property.name }}</td>
+                                            <td>{{ property|deserialize }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="flex justify-end mt-4">
+                                <button class="button button-secondary" data-action="modal#close">Close</button>
+                            </div>
+                        </dialog>
+                        <i data-action="click->modal#show" class="cursor-pointer text-slate-400 hover:text-slate-600 fa-solid fa-magnifying-glass"></i>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% include 'UI/_partial/pagination.html.twig' with {pages, route: 'view_stream', id} %}
+    </div>
+{% endblock %}

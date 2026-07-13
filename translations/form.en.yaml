@@ -1,0 +1,14 @@
+ARRAY: Array
+BOOLEAN: Boolean
+NUMERIC: Numeric
+TEXT: Text
+
+ADD: Add
+DIVIDE: Divide
+MULTIPLY: Multiply
+SUBTRACT: Subtract
+IGNORE: Ignore
+
+USER: User
+SUPER_USER: Super User
+OBSERVER: Observer

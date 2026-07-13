@@ -1,0 +1,26 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Error Management</h1>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th class="w-3/5 md:w-4/5">Error</th>
+                <th class="text-right">Recorded At</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for error in errors %}
+                <tr>
+                    <td class="w-3/5 md:w-4/5">{{ error.error }}</td>
+                    <td class="text-right text-slate-400 text-xs">{{ error.createdAt|date('jS M Y H:i:s') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% include 'UI/_partial/pagination.html.twig' with {pages, route: 'error-management', id: null} %}
+    </div>
+{% endblock %}

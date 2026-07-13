@@ -1,0 +1,8 @@
+# config/packages/mcp.yaml
+mcp:
+  app: 'eventsourcerer'
+  version: '1.0.0'
+  description: 'EventSourcerer MCP tools'
+  client_transports:
+    http: true
+    stdio: true

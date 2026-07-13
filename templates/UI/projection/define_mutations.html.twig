@@ -1,0 +1,100 @@
+{% extends 'UI/layout/base.html.twig' %}
+{% form_theme selectEventForm 'form/main_theme.html.twig' %}
+
+{% block content %}
+
+    <div class="p-4" id="parent-prototype-controller">
+        <h1 class="font-bold mb-5">For projection "{{ projection.name }}" <span class="text-slate-400 font-normal">when ...</span></h1>
+
+        <div class="mt-4">
+            {{ form_start(selectEventForm, {attr: {'data-controller': 'form'}}) }}
+            <div class="mb-6">
+                {{ form_widget(selectEventForm.event, {attr: {'data-action': 'form#submit', class: 'form-input w-full'}}) }}
+            </div>
+            {{ form_end(selectEventForm) }}
+        </div>
+
+        {% if form %}
+            {% set hasApplicableEventMutations = 0 != form.eventMutations|length %}
+
+            {% if not hasApplicableEventMutations %}
+                <twig:Alert type="warning" message="There are no properties inside this event which are compatible with property type {{ propertyType }}" />
+            {% endif %}
+
+            {{ form_start(form, {action: path('define_projection_mutations', {id, projectionEventPropertyId, eventId})}) }}
+            {% if not hasApplicableEventMutations %}
+                {{ form_widget(form.eventMutations) }}
+            {% endif %}
+
+            {% for eventMutation in form.eventMutations %}
+                <div
+                    data-controller="mutation-definition-display"
+                    data-mutation-definition-display-mutation-types-value="{{ mutationTypes }}"
+                    data-mutation-definition-display-event-property-key-value="{{ constant('App\\Domain\\Projection\\Model\\MutationDisplayPart::EventProperty').value }}"
+                    data-mutation-definition-display-preposition-key-value="{{ constant('App\\Domain\\Projection\\Model\\MutationDisplayPart::Preposition').value }}"
+                    data-mutation-definition-display-projection-property-key-value="{{ constant('App\\Domain\\Projection\\Model\\MutationDisplayPart::ProjectionProperty').value }}"
+                    data-mutation-definition-display-property-value="{{ property }}"
+                >
+                    <div class="border rounded-xl border-slate-200 bg-white shadow-sm mb-6 overflow-hidden dark:bg-slate-800 dark:border-slate-700"
+                         data-controller="prototype"
+                         data-index="{{ eventMutation.conditionGroups|length > 0 ? eventMutation.conditionGroups|last.vars.name + 1 : 0 }}"
+                         data-collection-holder-class="conditionGroups-{{ loop.index }}"
+                         data-prototype="{{ form_widget(eventMutation.conditionGroups.vars.prototype, {label: false})|e('html_attr') }}"
+                    >
+                        <div class="bg-slate-50 border-b border-slate-200 p-4 dark:bg-slate-800/50 dark:border-slate-700">
+                            <div class="flex flex-wrap items-center gap-4">
+                                {{ form_widget(eventMutation.mutationType,
+                                    {
+                                        attr: {
+                                            class: 'form-input',
+                                            'data-action': 'mutation-definition-display#changeDisplay',
+                                            'data-mutation-definition-display-target': 'select',
+                                        }
+                                    }
+                                ) }}
+                                <div data-mutation-definition-display-target="column2" class="flex items-center gap-2"></div>
+                                <div data-mutation-definition-display-target="column3" class="flex items-center gap-2"></div>
+                                <div data-mutation-definition-display-target="column4" class="flex items-center gap-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Mutation Conditions</h4>
+                                <a class="button button-secondary text-xs"
+                                   data-action="prototype#addProperty"
+                                >
+                                    <i class="fa-solid fa-plus mr-1"></i> Add Condition Group
+                                </a>
+                            </div>
+
+                            <twig:Help message="Optional - add conditions for whether this mutation should occur"></twig:Help>
+
+                            <ul id="conditionGroups-{{ loop.index }}" data-prototype-target="collectionHolder" class="mt-4 list-none p-0 m-0">
+                                {% for conditionGroup in eventMutation.conditionGroups %}
+                                    <li>{{ form_widget(conditionGroup, {label: false}) }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="hidden" data-mutation-definition-display-target="formInput">
+                        {{ form_widget(eventMutation.eventProperty.name, {attr: {readonly: true}} ) }}
+                    </div>
+                </div>
+
+                {{ form_widget(eventMutation.eventProperty.id) }}
+                <div class="hidden">{{ form_widget(eventMutation.eventProperty.type) }}</div>
+                <div class="hidden">{{ form_widget(eventMutation.eventProperty.containsPersonalData) }}</div>
+            {% endfor %}
+
+            {{ form_widget(form.selectedEvent) }}
+
+            {% if hasApplicableEventMutations %}
+                <button type="submit" class="button-primary button cursor-pointer">Update</button>
+            {% endif %}
+            {{ form_end(form) }}
+        {% endif %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Dashboard</h1>
+    </div>
+    <div class="grid grid-rows-2 gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-stretch">
+        {% for widget in widgets %}
+            <turbo-frame id="widget-{{ widget }}" src="{{ path('load_widget', {name: widget}) }}" class="h-full"></turbo-frame>
+        {% endfor %}
+        <turbo-frame id="active-workers" src="{{ path('monitoring_workers') }}" class="h-full"></turbo-frame>
+        <turbo-frame id="active-catchup-streams" src="{{ path('active_catchup_streams') }}" class="h-full"></turbo-frame>
+    </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+framework:
+    asset_mapper:
+        # The paths to make available to the asset mapper.
+        paths:
+            assets/: ''
+            src/Extension: 'widgets'
+        excluded_patterns:
+            - '*/node_modules/*'
+            - 'src/Extension/Packages/*/Mutation'
+            - 'src/Extension/Packages/*/Projections'

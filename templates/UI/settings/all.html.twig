@@ -1,0 +1,22 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <h1 class="text-xl font-semibold text-slate-800 mb-6 dark:text-slate-100">Settings</h1>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-6">
+        <div class="px-6 py-4 border-b border-slate-200">
+            <h4 class="text-sm font-semibold text-slate-700">Public SSH Key</h4>
+        </div>
+        <div class="p-6">
+            {{ form_start(forms.publicSshKey) }}
+            {{ form_errors(forms.publicSshKey) }}
+            <div class="mb-4">
+                {{ form_label(forms.publicSshKey.key, null, { label_attr: { class: 'form-label' }}) }}
+                {{ form_widget(forms.publicSshKey.key, { attr: { rows: 10, class: 'form-input w-full font-mono text-xs' }}) }}
+                {{ form_errors(forms.publicSshKey.key) }}
+            </div>
+            <button type="submit" class="button button-primary">Update public SSH key</button>
+            {{ form_end(forms.publicSshKey) }}
+        </div>
+    </div>
+{% endblock %}

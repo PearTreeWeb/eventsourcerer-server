@@ -1,0 +1,100 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Register Projection</h1>
+        <a class="button button-secondary" href="{{ path('projections') }}">Back to Projections</a>
+    </div>
+    <div class="mb-6">
+        {% include 'UI/_partial/info_box.html.twig' with {
+            info: 'Register view, built from event data'
+        } %}
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-3xl">
+        {{ form_start(form, {attr: {'data-controller': 'prototype'}}) }}
+        <div class="space-y-4">
+            <div class="flex flex-row items-center">
+                {{ form_label(form.name, null, {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.name, { attr: { class: 'form-input w-full' }} ) }}
+                    {{ form_errors(form.name) }}
+                </div>
+            </div>
+
+            <div class="flex flex-row items-start">
+                <div class="w-48 shrink-0"></div>
+                <div class="flex-grow">
+                    <twig:Help message="Continuous projections use existing events AND update when new events come in"></twig:Help>
+                </div>
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.continuous, null, {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex items-center h-5">
+                    {{ form_widget(form.continuous, { attr: { class: 'w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500' }}) }}
+                </div>
+                {{ form_errors(form.continuous) }}
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.partition, 'Partition by stream ID', {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex items-center h-5">
+                    {{ form_widget(form.partition, { attr: { class: 'w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500' }}) }}
+                </div>
+                {{ form_errors(form.partition) }}
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.exposeStateViaApi, 'Expose state via API', {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex items-center h-5">
+                    {{ form_widget(form.exposeStateViaApi, { attr: { class: 'w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500' }}) }}
+                </div>
+                {{ form_errors(form.exposeStateViaApi) }}
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.startDate, null, {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.startDate, {attr: {class: 'form-input w-full text-sm'}}) }}
+                    {{ form_errors(form.startDate) }}
+                </div>
+            </div>
+
+            <div class="flex flex-row items-center">
+                {{ form_label(form.endDate, null, {label_attr: {class: 'form-label mb-0 w-48 shrink-0'}} ) }}
+                <div class="flex-grow">
+                    {{ form_widget(form.endDate, {attr: {class: 'form-input w-full text-sm'}}) }}
+                    {{ form_errors(form.endDate) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Projection Properties</h3>
+                <a
+                    class="text-xs cursor-pointer text-emerald-600 hover:text-emerald-800 font-medium flex items-center gap-1"
+                    data-action="prototype#addProperty"
+                    data-index="{{ form.properties|length > 0 ? form.properties|last.vars.name + 1 : 0 }}"
+                    data-collection-holder-class="properties"
+                    data-prototype="{{ form_widget(form.properties.vars.prototype)|e('html_attr') }}"
+                >
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    Add Property
+                </a>
+            </div>
+            
+            <ul id="properties" data-prototype-target="collectionHolder" class="space-y-3 list-none p-0 m-0">
+                {% for property in form.properties %}
+                    <li>{{ form_widget(property) }}</li>
+                {% endfor %}
+            </ul>
+            {{ form_errors(form.properties) }}
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <button class="button button-primary px-8" type="submit">Save Projection</button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

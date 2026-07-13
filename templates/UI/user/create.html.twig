@@ -1,0 +1,25 @@
+{% extends 'UI/layout/base.html.twig' %}
+
+{% block content %}
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-6 text-sm">{{ flash_error }}</div>
+    {% endfor %}
+    <div class="max-w-lg">
+        <h1 class="text-xl font-semibold text-slate-800 mb-6">Add User</h1>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            {{ form_start(registrationForm) }}
+            <div class="mb-4">
+                {{ form_label(registrationForm.user.email, null, { label_attr: { class: 'form-label' }}) }}
+                {{ form_widget(registrationForm.user.email, {attr: {class: 'form-input w-full'}} ) }}
+                {{ form_errors(registrationForm.user.email) }}
+            </div>
+            <div class="mb-6">
+                {{ form_label(registrationForm.user.role, null, { label_attr: { class: 'form-label' }}) }}
+                {{ form_widget(registrationForm.user.role, {attr: {class: 'form-input w-full'}} ) }}
+                {{ form_errors(registrationForm.user.role) }}
+            </div>
+            <button type="submit" class="button button-primary">Continue</button>
+            {{ form_end(registrationForm) }}
+        </div>
+    </div>
+{% endblock %}

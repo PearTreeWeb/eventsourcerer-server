@@ -1,0 +1,103 @@
+services:
+  traefik:
+    image: "traefik:v3.6.2"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:[a-z-.]+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=websecure"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.docker.localhost`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+      - target: 443
+        published: 443
+        protocol: tcp
+      - target: 8080
+        published: 8081
+        protocol: tcp
+    volumes:
+      - ./docker/traefik.yaml:/etc/traefik/traefik.yaml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs/:/certs/
+    networks:
+      - private
+      - traefik_gateway
+  db:
+    image: postgres:${POSTGRES_VERSION:-14}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - private
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - 1025:1025
+      - 8025:8025
+    networks:
+      - private
+      - traefik_gateway
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bhi-mailpit.rule=Host(`mailpit.docker.localhost`)"
+      - "traefik.http.routers.bhi-mailpit.tls=true"
+      - "traefik.http.routers.bhi-mailpit.entrypoints=websecure"
+      - "traefik.http.services.bhi-mailpit.loadbalancer.server.port=8025"
+  php:
+    image: public.ecr.aws/z0p1v3n5/eventsourcerer/app:latest
+    platform: "linux/amd64"
+    ports:
+      - 5189:5189
+      - 1984:1984
+    environment:
+      SERVER_NAME: ":5189"
+      COMPOSER_MEMORY_LIMIT: -1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.php.rule=Host(`eventsourcerer.docker.localhost`)"
+      - "traefik.http.routers.php.entrypoints=websecure"
+      - "traefik.http.routers.php.tls=true"
+      - "traefik.http.services.php.loadbalancer.server.port=5189"
+      - "traefik.http.services.php.loadbalancer.server.scheme=http"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    volumes:
+      - ./:/app/
+      - ./docker/php/Caddyfile:/etc/frankenphp/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./certs/:/certs/
+    networks:
+      - private
+      - traefik_gateway
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  private: ~
+  traefik_gateway:
+    external: true
