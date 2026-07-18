@@ -3,10 +3,11 @@ setup:
 	docker compose up -d php
 	docker compose exec php composer install
 	docker compose exec php bin/console app:setup:create_certificates
-	docker compose exec php bin/console app:setup:load-projections
-	docker compose exec php bin/console app:setup:load-templates
+	docker compose exec php bin/console tailwind:build
 	@$(MAKE) trust-ca
 	@$(MAKE) up
+	docker compose exec php bin/console app:setup:load-projections
+	docker compose exec php bin/console app:setup:load-templates
 	@echo ""
 	@echo "✅ Setup complete. Open https://eventsourcerer.docker.localhost in your browser."
 
