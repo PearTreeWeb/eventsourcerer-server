@@ -123,6 +123,11 @@ final class DefineStateMutations extends AbstractController
                         ->map(static fn (EventProperty $eventProperty): array => $eventProperty->toArray())
                         ->values()
                         ->all(),
+                    'projectionProperties' => $projection
+                        ->eventProperties()
+                        ->items()
+                        ->mapWithKeys(static fn (ProjectionEventProperty $p) => [$p->name->toString() => $p->name->toString()])
+                        ->all(),
                 ]
             );
 

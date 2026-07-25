@@ -4,6 +4,7 @@ export default class extends Controller {
     static targets = ['holder', 'select'];
     static values = {
         prototype: String,
+        projectionPrototype: String,
         index: Number
     }
 
@@ -43,12 +44,17 @@ export default class extends Controller {
             container.className = 'flex flex-col';
             container.dataset.parameterIndex = i;
 
-            const prototype = this.prototypeValue.replace(/__name__/g, i);
+            const isProjectionCollection = selectedOption.dataset.isProjectionCollection === 'true';
+            const prototypeTemplate = isProjectionCollection ? this.projectionPrototypeValue : this.prototypeValue;
+
+            const prototype = prototypeTemplate.replace(/__name__/g, i);
             container.innerHTML = prototype.trim();
             
-            const input = container.querySelector('input');
+            const input = container.querySelector('input') || container.querySelector('select');
             if (input) {
-                input.placeholder = placeholder;
+                if (input.tagName === 'INPUT') {
+                    input.placeholder = placeholder;
+                }
                 if (currentValues && currentValues[i] !== undefined) {
                     let value = currentValues[i];
                     if (typeof value === 'object' && value !== null) {
@@ -56,8 +62,15 @@ export default class extends Controller {
                     }
                     input.value = value;
                 }
-                // Ensure the name is correct if the prototype didn't use __name__ in the right place
-                input.name = input.name.replace(/\[\d+\]$/, `[${i}]`);
+                
+                // Set the name to always be parameterValues[i] so the backend receives it correctly
+                // The prototype might have projectionPropertyParameterValues in the name
+                const nameMatch = input.name.match(/\[(\w+)\]\[\d+\]$/);
+                if (nameMatch) {
+                    input.name = input.name.replace(/\[\w+\]\[\d+\]$/, `[parameterValues][${i}]`);
+                } else {
+                    input.name = input.name.replace(/\[\d+\]$/, `[${i}]`);
+                }
             }
 
             // Re-apply errors if they exist for this index

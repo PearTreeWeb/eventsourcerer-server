@@ -13,7 +13,7 @@ final class ConditionGroupsType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'entry_options' => ['propertyType' => null, 'eventProperties' => []],
+            'entry_options' => ['propertyType' => null, 'eventProperties' => [], 'projectionProperties' => []],
             'entry_type' => ConditionGroupType::class,
             'allow_add' => true,
             'label' => false,

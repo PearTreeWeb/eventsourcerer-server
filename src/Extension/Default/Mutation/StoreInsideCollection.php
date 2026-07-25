@@ -31,7 +31,15 @@ final readonly class StoreInsideCollection extends SystemMutation
 
     public function mutate(EventPropertyValue $eventValue, mixed $currentValue): mixed
     {
-        $currentValue[] = $eventValue->toString();
+        $val = $eventValue->toString();
+        // If it was serialized as a JSON string, we should use that for comparison if the collection contains strings
+        // But usually event values are strings here.
+        
+        if (is_array($currentValue) && in_array($val, $currentValue, true)) {
+            return $currentValue;
+        }
+
+        $currentValue[] = $val;
 
         return $currentValue;
     }
