@@ -33,6 +33,16 @@ final readonly class SetProjectionMutationsHandler
             );
 
         $now = $this->clock->now();
+        $eventIdStr = $command->eventId->toString();
+
+        // Clear existing mutations for this event on this property
+        $mutations = $property->getMutationsCollection();
+        foreach ($mutations as $existingMutation) {
+            /** @var ProjectionMutationEntity $existingMutation */
+            if ($existingMutation->getEventId()->toString() === $eventIdStr) {
+                $mutations->removeElement($existingMutation);
+            }
+        }
 
         $command->stateMutations->each(
              function (ProjectionMutation $mutation) use ($projection, $property, $command, $now) {

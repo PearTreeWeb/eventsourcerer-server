@@ -16,6 +16,7 @@ final class ConditionsType extends AbstractType
             'entry_type' => ConditionType::class,
             'allow_add' => true,
             'propertyType' => null,
+            'eventProperties' => [],
         ]);
     }
 

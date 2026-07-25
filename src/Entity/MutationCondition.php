@@ -26,6 +26,12 @@ class MutationCondition
     #[ORM\Column(type: Types::JSON)]
     private array $parameterValues = [];
 
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    private ?string $eventPropertyId = null;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    private ?string $eventPropertyType = null;
+
     /**
      * @param array<string, mixed> $parameterValue
      */
@@ -33,12 +39,16 @@ class MutationCondition
         string $type,
         MutationConditionsGroup $conditionsGroup,
         array $parameterValue = [],
+        ?string $eventPropertyId = null,
+        ?string $eventPropertyType = null,
     ): self {
         $entity = new self();
 
         $entity->type = $type;
         $entity->conditionsGroup = $conditionsGroup;
         $entity->parameterValues = $parameterValue;
+        $entity->eventPropertyId = $eventPropertyId;
+        $entity->eventPropertyType = $eventPropertyType;
 
         return $entity;
     }
@@ -64,5 +74,15 @@ class MutationCondition
     public function getConditionsGroup(): MutationConditionsGroup
     {
         return $this->conditionsGroup;
+    }
+
+    public function getEventPropertyId(): ?string
+    {
+        return $this->eventPropertyId;
+    }
+
+    public function getEventPropertyType(): ?string
+    {
+        return $this->eventPropertyType;
     }
 }

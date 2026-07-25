@@ -13,6 +13,10 @@ trait PropertyTypeComparison
 
     public function canBeUsedWithProjectionPropertyType(PropertyType $propertyType): bool
     {
+        if ($this->isSameTypeAs(Collection::create())) {
+            return true;
+        }
+
         return $this->isSameTypeAs($propertyType);
     }
 }

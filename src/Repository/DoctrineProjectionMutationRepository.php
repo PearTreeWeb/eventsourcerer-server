@@ -137,7 +137,7 @@ final class DoctrineProjectionMutationRepository implements ProjectionMutationRe
         ProjectionMutationId $id
     ): ProjectionMutationConditionGroups {
         $sql = <<<SQL
-            SELECT mcg.id, mcg.group_type, mc.type, mc.parameter_values
+            SELECT mcg.id, mcg.group_type, mc.type, mc.parameter_values, mc.event_property_id, mc.event_property_type
             FROM mutation_conditions_group mcg
             LEFT JOIN mutation_condition mc ON mc.conditions_group_id = mcg.id
             WHERE projection_mutation_id = :id
@@ -155,6 +155,8 @@ final class DoctrineProjectionMutationRepository implements ProjectionMutationRe
                 ProjectionMutationConditionGroupKey::fromInt($row['id']),
                 MutationType::fromString($row['type']),
                 ConditionParameterValues::fromArray(is_string($row['parameter_values']) ? json_decode($row['parameter_values'], true) : (array) $row['parameter_values']),
+                $row['event_property_id'] ?? null,
+                $row['event_property_type'] ?? null,
             )
             )
             ->groupBy(fn (ProjectionMutationCondition $condition) => $condition->key())

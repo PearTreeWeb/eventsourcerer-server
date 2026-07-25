@@ -48,8 +48,6 @@ final class SocketConnection extends EventEmitter implements ConnectionInterface
 
     public function write($data): bool
     {
-        $this->emit('data', [$data]);
-
         return true;
     }
 

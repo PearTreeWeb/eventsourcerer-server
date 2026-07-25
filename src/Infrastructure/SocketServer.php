@@ -10,6 +10,7 @@ use App\Infrastructure\Repository\WorkerRepository;
 use DateTimeInterface;
 use Evenement\EventEmitterInterface;
 use PearTreeWeb\EventSourcerer\Common\Factory\MessageTypeFactory;
+use PearTreeWeb\EventSourcerer\Common\Model\MessageType;
 use PearTreeWeb\EventSourcerer\Common\Model\MessageMarkup;
 use Psr\Clock\ClockInterface;
 use Psr\Log\LoggerInterface;

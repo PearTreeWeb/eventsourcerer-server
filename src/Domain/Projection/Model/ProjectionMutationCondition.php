@@ -10,6 +10,8 @@ final readonly class ProjectionMutationCondition implements HasKey
         public ProjectionMutationConditionGroupKey $key,
         public MutationType $mutationType,
         public ConditionParameterValues $parameterValues,
+        public ?string $eventPropertyId = null,
+        public ?string $eventPropertyType = null,
     ) {}
 
     public function key(): string

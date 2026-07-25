@@ -11,6 +11,7 @@ use App\Domain\Projection\Model\MutationConditionGroups;
 use App\Domain\Projection\Model\ProjectionMutationCondition;
 use App\Domain\Projection\Model\ProjectionMutationConditionGroup;
 use App\Domain\Projection\Model\ProjectionMutationConditionGroups;
+use App\Domain\Stream\Model\StreamEventPayloadProperties;
 use App\Entity\MutationCondition;
 use App\Entity\MutationConditionsGroup;
 use App\Extension\Default\ConditionOperators\ConditionOperator;
@@ -23,7 +24,8 @@ final readonly class ConditionsChecker
     public static function isSatisfiedWith(
         MutationConditionGroups|ProjectionMutationConditionGroups|array $conditionGroups,
         PropertyType $propertyType,
-        EventPayloadProperty $eventPayloadProperty
+        EventPayloadProperty $eventPayloadProperty,
+        ?StreamEventPayloadProperties $payloadProperties = null
     ): bool {
         $satisfied = true;
 
@@ -73,8 +75,37 @@ final readonly class ConditionsChecker
                     $parameter = array_values($parameter)[0] ?? null;
                 }
 
+                $conditionEventPropertyId = $condition instanceof MutationCondition
+                    ? $condition->getEventPropertyId()
+                    : $condition->eventPropertyId;
+                $conditionEventPropertyType = $condition instanceof MutationCondition
+                    ? $condition->getEventPropertyType()
+                    : $condition->eventPropertyType;
+
+                $targetPropertyType = $propertyType;
+                $targetPayloadProperty = $eventPayloadProperty;
+
+                if (null !== $conditionEventPropertyId && null !== $payloadProperties) {
+                    $matchedPayloadProperty = $payloadProperties->items()->first(
+                        static fn ($p) => $p->id->toString() === $conditionEventPropertyId
+                    );
+
+                    if (null === $matchedPayloadProperty) {
+                        $satisfied = false;
+
+                        break;
+                    }
+
+                    $targetPayloadProperty = $matchedPayloadProperty->eventPayloadProperty;
+
+                    if (null !== $conditionEventPropertyType && class_exists($conditionEventPropertyType)) {
+                        /** @var PropertyType $targetPropertyType */
+                        $targetPropertyType = new $conditionEventPropertyType();
+                    }
+                }
+
                 $satisfied = $operator->compute(
-                    $propertyType::deserialize($eventPayloadProperty->value->toString()),
+                    $targetPropertyType::deserialize($targetPayloadProperty->value->toString()),
                     $parameter,
                 );
 

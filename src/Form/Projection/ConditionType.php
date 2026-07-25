@@ -24,7 +24,33 @@ final class ConditionType extends AbstractType implements DataMapperInterface
     {
         $conditionTypes = $options['propertyType']::conditionOperators();
 
+        /** @var array<array{id: string, name: string, type: class-string<PropertyType>}> $eventProperties */
+        $eventProperties = $options['eventProperties'] ?? [];
+
+        foreach ($eventProperties as $eventProperty) {
+            $conditionTypes = array_merge($conditionTypes, $eventProperty['type']::conditionOperators());
+        }
+
+        /** @var array<class-string<ConditionOperator>> $mergedConditionTypes */
+        $mergedConditionTypes = $conditionTypes;
+        $conditionTypes = \array_values(\array_unique($mergedConditionTypes));
+
+        $eventPropertyTypesById = array_column($eventProperties, 'type', 'id');
+
         $builder
+            ->add(
+                'eventProperty',
+                ChoiceType::class,
+                [
+                    'label' => 'Event property',
+                    'required' => false,
+                    'placeholder' => 'this property',
+                    'choices' => array_column($eventProperties, 'id', 'name'),
+                    'choice_attr' => static fn (string $eventPropertyId) => [
+                        'data-type' => $eventPropertyTypesById[$eventPropertyId] ?? '',
+                    ],
+                ]
+            )
             ->add(
                 'condition',
                 ChoiceType::class,
@@ -58,6 +84,7 @@ final class ConditionType extends AbstractType implements DataMapperInterface
     {
         $resolver->setDefaults([
             'propertyType' => '',
+            'eventProperties' => [],
         ]);
     }
 
@@ -79,6 +106,10 @@ final class ConditionType extends AbstractType implements DataMapperInterface
 
         $forms['condition']->setData($viewData->getType());
 
+        if (isset($forms['eventProperty'])) {
+            $forms['eventProperty']->setData($viewData->getEventPropertyId());
+        }
+
         $parameterValues = $viewData->getParameterValues();
         $parameterValues = array_map(function ($value) {
             if (is_array($value)) {
@@ -97,6 +128,17 @@ final class ConditionType extends AbstractType implements DataMapperInterface
         /** @var class-string<ConditionOperator> $condition */
         $condition = $forms['condition']->getData();
         $parameterValues = $forms['parameterValues']->getData();
+
+        /** @var ?string $eventPropertyId */
+        $eventPropertyId = isset($forms['eventProperty']) ? ($forms['eventProperty']->getData() ?: null) : null;
+
+        $eventPropertyType = null;
+
+        if (null !== $eventPropertyId) {
+            /** @var array<array{id: string, name: string, type: class-string<PropertyType>}> $eventProperties */
+            $eventProperties = $forms['eventProperty']->getParent()?->getConfig()->getOption('eventProperties') ?? [];
+            $eventPropertyType = array_column($eventProperties, 'type', 'id')[$eventPropertyId] ?? null;
+        }
 
         if (is_array($parameterValues)) {
             $parameterValues = array_values($parameterValues);
@@ -133,6 +175,8 @@ final class ConditionType extends AbstractType implements DataMapperInterface
         $viewData = [
             'condition' => $condition,
             'parameterValues' => $parameterValues,
+            'eventPropertyId' => $eventPropertyId,
+            'eventPropertyType' => $eventPropertyType,
         ];
     }
 }

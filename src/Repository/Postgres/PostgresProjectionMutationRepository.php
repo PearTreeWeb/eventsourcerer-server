@@ -195,6 +195,8 @@ final readonly class PostgresProjectionMutationRepository implements ProjectionM
             $parameterValues = json_decode($parameterValues, true);
         }
         $this->setProperty($ref, $condition, 'parameterValues', (array) $parameterValues);
+        $this->setProperty($ref, $condition, 'eventPropertyId', $row['event_property_id'] ?? null);
+        $this->setProperty($ref, $condition, 'eventPropertyType', $row['event_property_type'] ?? null);
 
         if ($group !== null) {
             $this->setProperty($ref, $condition, 'conditionsGroup', $group);
@@ -239,7 +241,7 @@ final readonly class PostgresProjectionMutationRepository implements ProjectionM
         ProjectionMutationId $id
     ): ProjectionMutationConditionGroups {
         $sql = <<<SQL
-            SELECT mcg.id, mcg.group_type, mc.type, mc.parameter_values
+            SELECT mcg.id, mcg.group_type, mc.type, mc.parameter_values, mc.event_property_id, mc.event_property_type
             FROM mutation_conditions_group mcg
             LEFT JOIN mutation_condition mc ON mc.conditions_group_id = mcg.id
             WHERE projection_mutation_id = :id
@@ -262,6 +264,8 @@ final readonly class PostgresProjectionMutationRepository implements ProjectionM
                         ProjectionMutationConditionGroupKey::fromInt($row['id']),
                         MutationType::fromString($row['type']),
                         ConditionParameterValues::fromArray(is_string($row['parameter_values']) ? json_decode($row['parameter_values'], true) : (array) $row['parameter_values']),
+                        $row['event_property_id'] ?? null,
+                        $row['event_property_type'] ?? null,
                     ))
                     ->all();
 

@@ -51,7 +51,7 @@ class SocketServerTestCase extends TestCase
         $logger                           = new ConsoleLogger(new ConsoleOutput());
         $checkpointRepository             = new ApplicationCheckpointRepository([]);
 
-        $this->mockConnectionConsumer->on('data', function ($event) {
+        $this->mockConnectionConsumer->on('received', function ($event) {
             if (str_contains($event, MessageType::NewEvent->value)) {
                 $this->mockConnectionConsumer->sendMockAcknowledgementOfNewEvent($event);
                 $this->messagesReceivedByConsumer[] = $event;

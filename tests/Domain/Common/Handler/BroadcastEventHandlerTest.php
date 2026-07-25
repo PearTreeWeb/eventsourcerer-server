@@ -32,7 +32,7 @@ final class BroadcastEventHandlerTest extends TestCase
         $this
             ->eventBroadcaster
             ->expects($this->once())
-            ->method('broadcast')
+            ->method('broadcastSync')
             ->with(FormatEvent::toJson(Entity::streamEvent()));
 
         $this->handler->__invoke($command);

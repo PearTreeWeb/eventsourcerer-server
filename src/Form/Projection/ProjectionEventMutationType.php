@@ -54,7 +54,7 @@ final class ProjectionEventMutationType extends AbstractType implements DataMapp
         $builder
             ->add('eventProperty', EventPropertyType::class)
             ->add('mutationType', MutationTypeType::class)
-            ->add('conditionGroups', ConditionGroupsType::class, ['entry_options' => ['propertyType' => $options['propertyType']]])
+            ->add('conditionGroups', ConditionGroupsType::class, ['entry_options' => ['propertyType' => $options['propertyType'], 'eventProperties' => $options['eventProperties']]])
             ->addEventListener(FormEvents::PRE_SET_DATA, $listener)
             ->setDataMapper($this);
     }
@@ -103,6 +103,7 @@ final class ProjectionEventMutationType extends AbstractType implements DataMapp
     {
         $resolver->setDefaults([
             'propertyType' => null,
+            'eventProperties' => [],
             'label' => false,
         ]);
     }
@@ -127,6 +128,8 @@ final class ProjectionEventMutationType extends AbstractType implements DataMapp
      *     group: array<array{
      *         condition: class-string,
      *         parameterValues: array<string, mixed>,
+     *         eventPropertyId?: ?string,
+     *         eventPropertyType?: ?string,
      *     }>
      * }> $rawConditionGroups
      */
@@ -142,6 +145,8 @@ final class ProjectionEventMutationType extends AbstractType implements DataMapp
                     $condition['condition'],
                     $group,
                     $condition['parameterValues'],
+                    $condition['eventPropertyId'] ?? null,
+                    $condition['eventPropertyType'] ?? null,
                 ),
                 $rawConditionGroup['group'],
             );

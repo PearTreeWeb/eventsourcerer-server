@@ -57,22 +57,23 @@ final readonly class RunProjectionMutation
 
             $currentValue = $currentState[$projectionPropertyName] ?? null;
 
-            $newValue = $this->mutations
-                ->byType($mutationType)
-                ?->mutate($eventPayloadProperty->value, $currentValue);
-
-            if (null === $newValue) {
-                return null;
-            }
-
             // Check conditions
             $conditionsSatisfied = ConditionsChecker::isSatisfiedWith(
                 $mutationConditionGroups,
                 new $projectionPropertyType(),
                 $eventPayloadProperty,
+                $payloadProperties,
             );
 
             if (false === $conditionsSatisfied) {
+                return null;
+            }
+
+            $newValue = $this->mutations
+                ->byType($mutationType)
+                ?->mutate($eventPayloadProperty->value, $currentValue);
+
+            if (null === $newValue) {
                 return null;
             }
 

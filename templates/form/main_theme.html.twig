@@ -113,7 +113,10 @@
          data-controller="condition-parameters"
          data-condition-parameters-prototype-value="{{ form_widget(form.parameterValues.vars.prototype, {attr: {class: 'form-input py-1 text-xs'}, label: false})|e('html_attr') }}"
     >
-        <span class="text-slate-500 font-medium whitespace-nowrap">When value</span>
+        <span class="text-slate-500 font-medium whitespace-nowrap">When value of</span>
+        {{ form_widget(form.eventProperty, {attr: {
+            'class': 'form-input py-1'
+        }, label: false}) }}
         {{ form_widget(form.condition, {attr: {
             'data-condition-parameters-target': 'select',
             'data-action': 'change->condition-parameters#updateParameters',

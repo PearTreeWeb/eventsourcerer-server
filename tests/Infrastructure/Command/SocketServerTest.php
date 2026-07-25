@@ -24,8 +24,14 @@ final class SocketServerTest extends SocketServerTestCase
 
         $this->eventEmitter->emit('connection', [$this->mockConnection]);
         $this->eventEmitter->emit('connection', [$this->mockConnectionConsumer]);
-        $this->mockConnection->emit('data', [self::identityPayload()]);
-        $this->mockConnectionConsumer->emit('data', [self::identityPayload()]);
+        
+        $producerWorkerId = \PearTreeWeb\EventSourcerer\Common\Model\WorkerId::fromString('worker-producer');
+        $consumerWorkerId = \PearTreeWeb\EventSourcerer\Common\Model\WorkerId::fromString('worker-consumer');
+        $applicationId = Id::applicationId();
+
+        $this->mockConnection->emit('data', [CreateMessage::forProvidingIdentity($applicationId, ApplicationType::Bespoke, $producerWorkerId)->toString()]);
+        $this->mockConnectionConsumer->emit('data', [CreateMessage::forProvidingIdentity($applicationId, ApplicationType::Bespoke, $consumerWorkerId)->toString()]);
+        
         $this->mockConnection->emit('data', [$payload5]);
         $this->mockConnection->emit('data', [$payload6]);
         $this->mockConnection->emit('data', [$payload1]);
@@ -34,8 +40,6 @@ final class SocketServerTest extends SocketServerTestCase
         $this->mockConnection->emit('data', [$payload4]);
 
         $this->assertReceivedEventsInOrder([
-            $payload5,
-            $payload6,
             $payload1,
             $payload2,
             $payload3,
@@ -49,18 +53,18 @@ final class SocketServerTest extends SocketServerTestCase
     {
         return CreateMessage::forNewEvent(
             sprintf(
-                '{"eventVersion":1,"name":"item-added-to-basket","allSequence":1,"number":%d,"payload":{"price":"3000","name":"new hat 3"},"stream":"basket-acb99083-add1-4f1b-acd4-c85ecc3deb3a","occurred":"2025-02-11T06:44:28+00:00","workerId":1}',
+                '{"eventVersion":1,"name":"item-added-to-basket","allSequence":1,"number":%d,"payload":{"price":"3000","name":"new hat 3"},"stream":"basket-acb99083-add1-4f1b-acd4-c85ecc3deb3a","occurred":"2025-02-11T06:44:28+00:00","workerId":"worker-consumer"}',
                 $checkpoint,
             )
         )->toString();
     }
 
-    private static function identityPayload(): string
+    private static function identityPayload(string $workerId): string
     {
         return CreateMessage::forProvidingIdentity(
             Id::applicationId(),
             ApplicationType::Bespoke,
-            Id::workerId(),
+            \PearTreeWeb\EventSourcerer\Common\Model\WorkerId::fromString($workerId),
         )->toString();
     }
 }
