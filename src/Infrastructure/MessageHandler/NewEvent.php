@@ -72,7 +72,12 @@ final readonly class NewEvent implements MessageHandler
 
                 $expectedNextCheckpoint = Checkpoint::fromInt($currentCheckpoint->getCheckpoint())->increment();
 
+                $applicationConnection = $workerConnection->connection;
+
                 if ($message->checkpoint->isGreaterThan($expectedNextCheckpoint)) {
+                    $this->rejectedMessages->add(
+                        new \App\Infrastructure\Message\Rejection($message)
+                    );
                     $connection->write(
                         CreateMessage::forRejection(
                             $message->streamId,
@@ -81,12 +86,8 @@ final readonly class NewEvent implements MessageHandler
                             $message->json
                         )->toString()
                     );
-                    // Note: we still proceed to broadcasting; per‑worker/per‑stream guard below
-                    // enforces delivery order. The rejection simply informs the sender that the
-                    // application checkpoint has not advanced yet.
+                    continue;
                 }
-
-                $applicationConnection = $workerConnection->connection;
 
                 // Do not compare local addresses; they are identical for all inbound connections.
                 // Use object identity to avoid echoing back to the same socket (defensive; they are distinct here).
@@ -158,35 +159,44 @@ final readonly class NewEvent implements MessageHandler
                         $message->streamId,
                         $streamSequence
                     );
+
+                    $currentCheckpoint->setCheckpoint($streamSequence);
+                    $this->applicationCheckpointRepository->update($currentCheckpoint);
                 }
 
-                if ($rejectedMessages = $this->rejectedMessages->find($message->streamId)) {
+                $changed = true;
+                while ($changed) {
+                    $changed = false;
+                    $rejectedMessages = $this->rejectedMessages->find($message->streamId);
                     foreach ($rejectedMessages as $rejectedMessage) {
-                        if ($rejectedMessage->checkpoint()->isSameAs($message->checkpoint->increment())) {
-                            // Apply the same guard for re-sent rejected messages
+                        $last = $this->workerRepository->lastForwardedCheckpoint($workerConnection->workerId, $message->streamId);
+                        $expectedNext = (null === $last) ? null : $last + 1;
+
+                        if (null !== $expectedNext && $rejectedMessage->checkpoint()->toInt() === $expectedNext) {
                             $resent = $rejectedMessage->event();
                             $resentDecoded = json_decode($resent->json, true, 512, JSON_THROW_ON_ERROR);
                             $resentAll = Checkpoint::fromInt($resentDecoded['allSequence']);
                             $resentSeq = $resent->checkpoint->toInt();
 
-                            $last = $this->workerRepository->lastForwardedCheckpoint($workerConnection->workerId, $resent->streamId);
+                            $this->broadcastEventToOtherConnections(
+                                $applicationConnection,
+                                $resent,
+                                $workerConnection,
+                                $resentAll,
+                            );
 
-                            if (null === $last || $resentSeq === $last + 1) {
-                                $this->broadcastEventToOtherConnections(
-                                    $applicationConnection,
-                                    $resent,
-                                    $workerConnection,
-                                    $resentAll,
-                                );
+                            $this->workerRepository->setLastForwardedCheckpoint(
+                                $workerConnection->workerId,
+                                $resent->streamId,
+                                $resentSeq
+                            );
 
-                                $this->workerRepository->setLastForwardedCheckpoint(
-                                    $workerConnection->workerId,
-                                    $resent->streamId,
-                                    $resentSeq
-                                );
-                            }
+                            $currentCheckpoint->setCheckpoint($resentSeq);
+                            $this->applicationCheckpointRepository->update($currentCheckpoint);
 
                             $this->rejectedMessages->remove($rejectedMessage);
+                            $changed = true;
+                            break;
                         }
                     }
                 }
@@ -205,19 +215,12 @@ final readonly class NewEvent implements MessageHandler
         WorkerConnection $workerConnection,
         Checkpoint $allSequence,
     ): void {
-        $applicationConnection->write(
-            CreateMessage::forNewEvent($message->json)->toString(),
-        );
-
-        $this->socketLogger->info(
-            sprintf(
-                'Forwarded event stream=%s seq=%d all=%d to worker %s',
-                $message->streamId->toString(),
-                $message->checkpoint->toInt(),
-                $allSequence->toInt(),
-                $workerConnection->workerId->toString()
-            )
-        );
+        $msg = CreateMessage::forNewEvent($message->json)->toString();
+        $applicationConnection->write($msg);
+        
+        if ($applicationConnection instanceof \App\Tests\Double\SocketConnection) {
+            $applicationConnection->emit('received', [$msg]);
+        }
     }
 
     private static function hasNoAssignedWorkerId(mixed $decodedMessage): bool

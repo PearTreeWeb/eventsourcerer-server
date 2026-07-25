@@ -16,13 +16,14 @@ final class ConditionGroupType extends AbstractType implements DataMapperInterfa
     {
         $builder
             ->add('conditionGroupType', ConditionGroupAndOrType::class)
-            ->add('group', ConditionsType::class, ['entry_options' => ['propertyType' => $options['propertyType']]])
+            ->add('group', ConditionsType::class, ['entry_options' => ['propertyType' => $options['propertyType'], 'eventProperties' => $options['eventProperties']]])
             ->setDataMapper($this);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefault('propertyType', null);
+        $resolver->setDefault('eventProperties', []);
     }
 
     /**

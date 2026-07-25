@@ -40,15 +40,15 @@ final readonly class MessageDecoder
 
             $matched = preg_match_all('/{(?:[^{}]*|(?R))*}/', $message, $jsonParts);
 
-            $messageParts = '';
+            $messagePartsRemovedJson = $message;
 
-            if (false !== $matched) {
-                foreach ($jsonParts as $jsonPart) {
-                    $messageParts = str_replace($jsonPart, '', $message);
+            if (false !== $matched && !empty($jsonParts[0])) {
+                foreach ($jsonParts[0] as $jsonPart) {
+                    $messagePartsRemovedJson = str_replace($jsonPart, '', $messagePartsRemovedJson);
                 }
             }
 
-            $messageParts = str_replace(',', '', $messageParts);
+            $messageParts = str_replace(',', '', $messagePartsRemovedJson);
             $messageParts = explode(' ', $messageParts);
             $messageParts = array_values(array_filter($messageParts, static fn ($value) => $value !== ''));
 
@@ -184,8 +184,8 @@ final readonly class MessageDecoder
      */
     private static function writeNewEvent(array $messageParts, array $jsonParts): Message
     {
-        $expectedVersion = isset($messageParts[6])
-            ? (int) $messageParts[6]
+        $expectedVersion = isset($messageParts[4])
+            ? (int) $messageParts[4]
             : null;
 
         return new WriteNewEvent(

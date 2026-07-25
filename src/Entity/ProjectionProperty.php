@@ -124,6 +124,14 @@ class ProjectionProperty
     }
 
     /**
+     * @return Collection<int, ProjectionMutation>
+     */
+    public function getMutationsCollection(): Collection
+    {
+        return $this->mutations;
+    }
+
+    /**
      * @return IlluminateCollection<string, ProjectionMutation>
      */
     public function getMutations(): IlluminateCollection

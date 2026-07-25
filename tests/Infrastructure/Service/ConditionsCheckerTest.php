@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Infrastructure\Service;
 
 use App\Domain\Event\Model\EventPayloadProperty;
+use App\Domain\Event\Model\EventPropertyId;
 use App\Domain\Event\Model\EventPropertyName;
 use App\Domain\Event\Model\EventPropertyValue;
 use App\Domain\Projection\Model\ConditionGroupAndOr;
@@ -15,11 +16,15 @@ use App\Domain\Projection\Model\ProjectionMutationConditionGroup;
 use App\Domain\Projection\Model\ProjectionMutationConditionGroupKey;
 use App\Domain\Projection\Model\ProjectionMutationConditionGroups;
 use App\Domain\Projection\Service\ConditionsChecker;
+use App\Domain\Stream\Model\StreamEventPayloadProperties;
+use App\Domain\Stream\Model\StreamEventPayloadProperty;
 use App\Entity\MutationCondition;
 use App\Entity\MutationConditionsGroup;
+use App\Extension\Default\ConditionOperators\EqualTo;
 use App\Extension\Default\ConditionOperators\GreaterThan;
 use App\Extension\Default\ConditionOperators\LessThan;
 use App\Extension\Default\PropertyType\Integer;
+use App\Extension\Default\PropertyType\Text;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -164,6 +169,124 @@ final class ConditionsCheckerTest extends TestCase
                     EventPropertyName::fromString('price'),
                     EventPropertyValue::fromString('2500')
                 )
+            )
+        );
+    }
+
+    #[Test]
+    public function itEvaluatesAConditionAgainstADifferentEventProperty(): void
+    {
+        $surnamePropertyId = '11111111-1111-1111-1111-111111111111';
+
+        $mutationConditionsGroup = MutationConditionsGroup::create(ConditionGroupAndOr::And);
+
+        $mutationCondition = MutationCondition::create(
+            EqualTo::class,
+            $mutationConditionsGroup,
+            ['Smith'],
+            $surnamePropertyId,
+            Text::class,
+        );
+
+        $mutationConditionsGroup->setConditions([$mutationCondition]);
+
+        $candidateIdProperty = new EventPayloadProperty(
+            EventPropertyName::fromString('candidate-id'),
+            EventPropertyValue::fromString('2500')
+        );
+
+        $payloadProperties = StreamEventPayloadProperties::fromArray([
+            new StreamEventPayloadProperty(
+                EventPropertyId::fromString('22222222-2222-2222-2222-222222222222'),
+                $candidateIdProperty,
+            ),
+            new StreamEventPayloadProperty(
+                EventPropertyId::fromString($surnamePropertyId),
+                new EventPayloadProperty(
+                    EventPropertyName::fromString('surname'),
+                    EventPropertyValue::fromString('Smith')
+                ),
+            ),
+        ]);
+
+        $this->assertTrue(
+            ConditionsChecker::isSatisfiedWith(
+                [$mutationConditionsGroup],
+                new Integer(),
+                $candidateIdProperty,
+                $payloadProperties,
+            )
+        );
+    }
+
+    #[Test]
+    public function itIsNotSatisfiedWhenTheOtherEventPropertyDoesNotMatch(): void
+    {
+        $surnamePropertyId = '11111111-1111-1111-1111-111111111111';
+
+        $mutationConditionsGroup = MutationConditionsGroup::create(ConditionGroupAndOr::And);
+
+        $mutationCondition = MutationCondition::create(
+            EqualTo::class,
+            $mutationConditionsGroup,
+            ['Smith'],
+            $surnamePropertyId,
+            Text::class,
+        );
+
+        $mutationConditionsGroup->setConditions([$mutationCondition]);
+
+        $candidateIdProperty = new EventPayloadProperty(
+            EventPropertyName::fromString('candidate-id'),
+            EventPropertyValue::fromString('2500')
+        );
+
+        $payloadProperties = StreamEventPayloadProperties::fromArray([
+            new StreamEventPayloadProperty(
+                EventPropertyId::fromString($surnamePropertyId),
+                new EventPayloadProperty(
+                    EventPropertyName::fromString('surname'),
+                    EventPropertyValue::fromString('Jones')
+                ),
+            ),
+        ]);
+
+        $this->assertFalse(
+            ConditionsChecker::isSatisfiedWith(
+                [$mutationConditionsGroup],
+                new Integer(),
+                $candidateIdProperty,
+                $payloadProperties,
+            )
+        );
+    }
+
+    #[Test]
+    public function itIsNotSatisfiedWhenTheOtherEventPropertyIsMissingFromThePayload(): void
+    {
+        $mutationConditionsGroup = MutationConditionsGroup::create(ConditionGroupAndOr::And);
+
+        $mutationCondition = MutationCondition::create(
+            EqualTo::class,
+            $mutationConditionsGroup,
+            ['Smith'],
+            '11111111-1111-1111-1111-111111111111',
+            Text::class,
+        );
+
+        $mutationConditionsGroup->setConditions([$mutationCondition]);
+
+        $candidateIdProperty = new EventPayloadProperty(
+            EventPropertyName::fromString('candidate-id'),
+            EventPropertyValue::fromString('2500')
+        );
+
+        $this->assertFalse(
+            ConditionsChecker::isSatisfiedWith(
+                [$mutationConditionsGroup],
+                new Integer(),
+                $candidateIdProperty,
+                StreamEventPayloadProperties::fromArray([]),
             )
         );
     }

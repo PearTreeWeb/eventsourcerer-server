@@ -25,6 +25,7 @@ final class DefineStateMutationsType extends AbstractType implements DataMapperI
                     'entry_type'    => ProjectionEventMutationType::class,
                     'entry_options' => [
                         'propertyType' => $options['propertyType'],
+                        'eventProperties' => $options['eventProperties'],
                     ],
                     'label' => false,
                 ]
@@ -54,6 +55,7 @@ final class DefineStateMutationsType extends AbstractType implements DataMapperI
     {
         $resolver->setDefaults([
             'propertyType' => null,
+            'eventProperties' => [],
         ]);
     }
 }

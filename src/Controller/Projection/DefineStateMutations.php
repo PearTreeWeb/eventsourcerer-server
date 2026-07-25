@@ -117,6 +117,12 @@ final class DefineStateMutations extends AbstractController
                 $formData,
                 [
                     'propertyType' => $property->type,
+                    'eventProperties' => $selectedEvent
+                        ->eventProperties()
+                        ->items()
+                        ->map(static fn (EventProperty $eventProperty): array => $eventProperty->toArray())
+                        ->values()
+                        ->all(),
                 ]
             );
 
