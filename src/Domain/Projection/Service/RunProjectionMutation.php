@@ -63,6 +63,7 @@ final readonly class RunProjectionMutation
                 new $projectionPropertyType(),
                 $eventPayloadProperty,
                 $payloadProperties,
+                $currentState,
             );
 
             if (false === $conditionsSatisfied) {

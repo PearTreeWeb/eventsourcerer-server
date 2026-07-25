@@ -17,6 +17,7 @@ final class ConditionsType extends AbstractType
             'allow_add' => true,
             'propertyType' => null,
             'eventProperties' => [],
+            'projectionProperties' => [],
         ]);
     }
 

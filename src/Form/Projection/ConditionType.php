@@ -61,6 +61,7 @@ final class ConditionType extends AbstractType implements DataMapperInterface
                     'group_by' => static fn (string $conditionClassString) => $conditionClassString::author()->toString(),
                     'choice_attr' => static fn (string $conditionClassString) => [
                         'data-parameters' => json_encode($conditionClassString::parameters()),
+                        'data-is-projection-collection' => $conditionClassString === \App\Extension\Default\ConditionOperators\InsideProjectionCollection::class ? 'true' : 'false',
                     ],
                 ]
             )
@@ -75,6 +76,26 @@ final class ConditionType extends AbstractType implements DataMapperInterface
                     'label' => false,
                     'by_reference' => false,
                     'error_bubbling' => false,
+                    'entry_options' => [
+                        'attr' => ['class' => 'parameter-value-input'],
+                    ],
+                ]
+            )
+            ->add(
+                'projectionPropertyParameterValues',
+                CollectionType::class,
+                [
+                    'entry_type' => ChoiceType::class,
+                    'entry_options' => [
+                        'choices' => $options['projectionProperties'],
+                        'attr' => ['class' => 'projection-property-parameter-value-input'],
+                    ],
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'prototype' => true,
+                    'label' => false,
+                    'by_reference' => false,
+                    'mapped' => false,
                 ]
             )
             ->setDataMapper($this);
@@ -85,6 +106,7 @@ final class ConditionType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             'propertyType' => '',
             'eventProperties' => [],
+            'projectionProperties' => [],
         ]);
     }
 
@@ -111,14 +133,20 @@ final class ConditionType extends AbstractType implements DataMapperInterface
         }
 
         $parameterValues = $viewData->getParameterValues();
-        $parameterValues = array_map(function ($value) {
+        $isInsideProjectionCollection = $viewData->getType() === \App\Extension\Default\ConditionOperators\InsideProjectionCollection::class;
+
+        $parameterValuesString = array_map(function ($value) {
             if (is_array($value)) {
                 return json_encode($value);
             }
             return (string) $value;
         }, $parameterValues);
 
-        $forms['parameterValues']->setData($parameterValues);
+        $forms['parameterValues']->setData($parameterValuesString);
+
+        if ($isInsideProjectionCollection && isset($forms['projectionPropertyParameterValues'])) {
+            $forms['projectionPropertyParameterValues']->setData($parameterValuesString);
+        }
     }
 
     public function mapFormsToData(\Traversable $forms, mixed &$viewData): void
@@ -127,6 +155,8 @@ final class ConditionType extends AbstractType implements DataMapperInterface
 
         /** @var class-string<ConditionOperator> $condition */
         $condition = $forms['condition']->getData();
+
+        // We always use parameterValues because the JS controller now ensures everything is submitted under that key
         $parameterValues = $forms['parameterValues']->getData();
 
         /** @var ?string $eventPropertyId */

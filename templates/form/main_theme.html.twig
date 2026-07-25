@@ -112,6 +112,7 @@
     <div class="flex items-center gap-3 text-sm p-3 pb-8 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-900/50 dark:border-slate-700"
          data-controller="condition-parameters"
          data-condition-parameters-prototype-value="{{ form_widget(form.parameterValues.vars.prototype, {attr: {class: 'form-input py-1 text-xs'}, label: false})|e('html_attr') }}"
+         data-condition-parameters-projection-prototype-value="{{ form_widget(form.projectionPropertyParameterValues.vars.prototype, {attr: {class: 'form-input py-1 text-xs'}, label: false})|e('html_attr') }}"
     >
         <span class="text-slate-500 font-medium whitespace-nowrap">When value of</span>
         {{ form_widget(form.eventProperty, {attr: {

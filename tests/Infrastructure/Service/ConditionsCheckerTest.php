@@ -290,4 +290,64 @@ final class ConditionsCheckerTest extends TestCase
             )
         );
     }
+    #[Test]
+    public function itIsSatisfiedWithInsideProjectionCollection(): void
+    {
+        $condition1 = new ProjectionMutationCondition(
+            ProjectionMutationConditionGroupKey::fromInt(1),
+            MutationType::fromString(\App\Extension\Default\ConditionOperators\InsideProjectionCollection::class),
+            ConditionParameterValues::fromArray(['my_collection'])
+        );
+
+        $group1 = ProjectionMutationConditionGroup::fromArray([$condition1])
+            ->withGroupType(ConditionGroupAndOr::And);
+
+        $groups = ProjectionMutationConditionGroups::fromArray([$group1]);
+
+        $currentState = [
+            'my_collection' => ['val1', 'val2']
+        ];
+
+        // Satisfied
+        $this->assertTrue(
+            ConditionsChecker::isSatisfiedWith(
+                $groups,
+                new Text(),
+                new EventPayloadProperty(
+                    EventPropertyName::fromString('v'),
+                    EventPropertyValue::fromString('val1')
+                ),
+                null,
+                $currentState
+            )
+        );
+
+        // Not satisfied (value not in collection)
+        $this->assertFalse(
+            ConditionsChecker::isSatisfiedWith(
+                $groups,
+                new Text(),
+                new EventPayloadProperty(
+                    EventPropertyName::fromString('v'),
+                    EventPropertyValue::fromString('val3')
+                ),
+                null,
+                $currentState
+            )
+        );
+
+        // Not satisfied (collection property doesn't exist in state)
+        $this->assertFalse(
+            ConditionsChecker::isSatisfiedWith(
+                $groups,
+                new Text(),
+                new EventPayloadProperty(
+                    EventPropertyName::fromString('v'),
+                    EventPropertyValue::fromString('val1')
+                ),
+                null,
+                ['other_property' => []]
+            )
+        );
+    }
 }

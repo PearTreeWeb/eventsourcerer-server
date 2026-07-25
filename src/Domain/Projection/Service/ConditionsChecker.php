@@ -20,12 +20,14 @@ final readonly class ConditionsChecker
 {
     /**
      * @param MutationConditionGroups|ProjectionMutationConditionGroups|array<mixed> $conditionGroups
+     * @param array<string, mixed>|null $currentState
      */
     public static function isSatisfiedWith(
         MutationConditionGroups|ProjectionMutationConditionGroups|array $conditionGroups,
         PropertyType $propertyType,
         EventPayloadProperty $eventPayloadProperty,
-        ?StreamEventPayloadProperties $payloadProperties = null
+        ?StreamEventPayloadProperties $payloadProperties = null,
+        ?array $currentState = null,
     ): bool {
         $satisfied = true;
 
@@ -75,6 +77,10 @@ final readonly class ConditionsChecker
                     $parameter = array_values($parameter)[0] ?? null;
                 }
 
+                if ($operator instanceof \App\Extension\Default\ConditionOperators\InsideProjectionCollection && is_string($parameter)) {
+                    $parameter = $currentState[$parameter] ?? [];
+                }
+
                 $conditionEventPropertyId = $condition instanceof MutationCondition
                     ? $condition->getEventPropertyId()
                     : $condition->eventPropertyId;
@@ -105,7 +111,7 @@ final readonly class ConditionsChecker
                 }
 
                 $satisfied = $operator->compute(
-                    $targetPropertyType::deserialize($targetPayloadProperty->value->toString()),
+                    $targetPayloadProperty->value->toString(),
                     $parameter,
                 );
 

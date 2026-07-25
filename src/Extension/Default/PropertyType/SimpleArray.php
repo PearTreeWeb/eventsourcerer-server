@@ -11,6 +11,7 @@ use App\Domain\Common\Model\PropertyTypeDescription;
 use App\Extension\Default\ConditionOperators\EqualTo;
 use App\Extension\Default\ConditionOperators\Excludes;
 use App\Extension\Default\ConditionOperators\Includes;
+use App\Extension\Default\ConditionOperators\InsideProjectionCollection;
 use App\Extension\Default\ConditionOperators\NotEqualTo;
 
 abstract class SimpleArray implements PropertyType
@@ -64,6 +65,7 @@ abstract class SimpleArray implements PropertyType
             NotEqualTo::class,
             Includes::class,
             Excludes::class,
+            InsideProjectionCollection::class,
         ];
     }
 
