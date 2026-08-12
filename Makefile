@@ -47,3 +47,8 @@ down:
 
 in:
 	docker compose exec -it php /bin/bash
+
+clean:
+	@$(MAKE) down
+	docker compose down -v --remove-orphans
+	@$(MAKE) up

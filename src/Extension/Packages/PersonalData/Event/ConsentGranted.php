@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Extension\Packages\PersonalData\Event;
 
+use App\Domain\Common\Model\Author;
 use App\Domain\Event\Model\EventId;
 use App\Domain\Event\Model\EventName;
 use App\Domain\Event\Model\EventProperties;
@@ -52,5 +53,10 @@ final readonly class ConsentGranted implements EventTemplate
     public static function tombstoneAfterNSeconds(): int
     {
         return 0;
+    }
+
+    public static function author(): Author
+    {
+        return Author::eventSourcerer();
     }
 }

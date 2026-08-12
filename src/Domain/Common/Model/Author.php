@@ -11,7 +11,7 @@ final class Author implements IsString
 {
     use FulfilIsString;
 
-    private const string EVENT_SOURCERER = 'Event Sourcerer';
+    private const string EVENT_SOURCERER = 'EventSourcerer';
 
     public static function eventSourcerer(): self
     {

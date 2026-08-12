@@ -27,7 +27,8 @@ final readonly class RegisterEventHandler
             $command->id,
             $command->name->toString(),
             $command->tombstoneAfter,
-            $this->clock->now()
+            $this->clock->now(),
+            $command->authorId
         );
 
         $event->setProperties(self::eventPropertyEntities($command->properties, $event, $now));
