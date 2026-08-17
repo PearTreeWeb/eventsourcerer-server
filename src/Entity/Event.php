@@ -51,11 +51,15 @@ class Event
     #[ORM\OneToMany(targetEntity: EventProperty::class, mappedBy: 'event')]
     private Collection $properties;
 
+    #[ORM\Column(type: UuidType::NAME, nullable: true)]
+    private ?Uuid $authorId = null;
+
     public static function create(
         EventId $id,
         string $name,
         int $tombstoneAfterSeconds,
-        \DateTimeImmutable $createdAt
+        \DateTimeImmutable $createdAt,
+        ?Uuid $authorId = null
     ): self {
         $event = new self();
         $event->id = $id->toUuid();
@@ -63,8 +67,21 @@ class Event
         $event->tombstoneAfterSeconds = $tombstoneAfterSeconds;
         $event->createdAt = $createdAt;
         $event->updatedAt = $createdAt;
+        $event->authorId = $authorId;
 
         return $event;
+    }
+
+    public function getAuthorId(): ?Uuid
+    {
+        return $this->authorId;
+    }
+
+    public function setAuthorId(?Uuid $authorId): self
+    {
+        $this->authorId = $authorId;
+
+        return $this;
     }
 
     public function setIsSystemEvent(bool $isSystemEvent): self
@@ -166,6 +183,7 @@ class Event
         $entity->createdAt   = $createdAt;
         $entity->updatedAt   = $createdAt;
         $entity->version     = $this->version +1;
+        $entity->authorId    = $this->authorId;
 
         return $entity;
     }

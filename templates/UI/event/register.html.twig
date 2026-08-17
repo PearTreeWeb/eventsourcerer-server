@@ -16,7 +16,7 @@
         {{ form_start(form, {attr: {'data-controller': 'prototype'}}) }}
             <div class="mb-5">
                 {{ form_label(form.name, 'Event Name', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.name, { attr: { class: 'form-input' }} ) }}
+                {{ form_widget(form.name, { attr: { class: 'form-input w-full' }} ) }}
                 {{ form_errors(form.name) }}
             </div>
             <a
@@ -33,6 +33,11 @@
                     {% endfor %}
                 </ul>
                 {{ form_errors(form.properties) }}
+            </div>
+            <div class="mb-6">
+                {{ form_label(form.authorId, 'Author', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.authorId, { attr: { class: 'form-input w-full' }} ) }}
+                {{ form_errors(form.authorId) }}
             </div>
             <hr class="border-slate-200 mb-6" />
             <div class="mb-6">

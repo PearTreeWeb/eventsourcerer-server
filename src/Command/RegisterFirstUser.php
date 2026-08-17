@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Domain\Author\Model\AuthorId;
+use App\Domain\Author\Repository\AuthorRepository;
 use App\Domain\User\Model\EmailAddress;
 use App\Domain\User\Model\Role;
 use App\Domain\User\Model\UserId;
 use App\Domain\User\Repository\UserRepository;
+use App\Entity\Author;
 use App\Entity\User;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\Uid\Uuid;
@@ -29,6 +32,7 @@ final class RegisterFirstUser extends Command
 
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly AuthorRepository $authorRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly ClockInterface $clock,
     ) {
@@ -49,6 +53,32 @@ final class RegisterFirstUser extends Command
         }
 
         $io->title('Register the first super user');
+
+        $forenameQuestion = new Question('Forename: ');
+        $forenameQuestion->setValidator(static function (?string $value): string {
+            $value = trim((string) $value);
+            if ($value === '') {
+                throw new \RuntimeException('Forename is required.');
+            }
+
+            return $value;
+        });
+        $forename = (string) $io->askQuestion($forenameQuestion);
+
+        $surnameQuestion = new Question('Surname: ');
+        $surnameQuestion->setValidator(static function (?string $value): string {
+            $value = trim((string) $value);
+            if ($value === '') {
+                throw new \RuntimeException('Surname is required.');
+            }
+
+            return $value;
+        });
+        $surname = (string) $io->askQuestion($surnameQuestion);
+
+        $companyQuestion = new Question('Company name (optional): ', '');
+        $companyName = trim((string) $io->askQuestion($companyQuestion));
+        $companyName = $companyName === '' ? null : $companyName;
 
         $emailQuestion = new Question('Email address: ');
         $emailQuestion->setValidator(static function (?string $value): string {
@@ -96,12 +126,22 @@ final class RegisterFirstUser extends Command
             UserId::fromUuid(Uuid::v7()),
             EmailAddress::fromString($email),
             Role::SUPER_USER,
+            $forename,
+            $surname,
+            $companyName,
         );
         $user->setAsSuperUser();
         $user->setIsVerified(true);
         $user->setPassword($this->passwordHasher->hashPassword($user, $password));
 
         $this->userRepository->create($user, $this->clock->now());
+
+        $authorName = $companyName ?? sprintf('%s %s', $forename, $surname);
+        if ($this->authorRepository->findByName($authorName) === null) {
+            $author = Author::create(AuthorId::fromUuid(Uuid::v7()), $authorName);
+            $this->authorRepository->create($author);
+            $io->writeln(sprintf('<info>Author "%s" created.</info>', $authorName));
+        }
 
         $io->success(sprintf('First super user "%s" created successfully.', $email));
 

@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Extension\Default\Event;
+namespace App\Extension\Packages\MicroManager\Event;
 
 use App\Domain\Common\Model\Author;
-use App\Domain\Common\Model\DateTimeType;
 use App\Domain\Event\Model\EventId;
 use App\Domain\Event\Model\EventName;
 use App\Domain\Event\Model\EventProperties;
@@ -13,16 +12,20 @@ use App\Domain\Event\Model\EventProperty;
 use App\Domain\Event\Model\EventPropertyId;
 use App\Domain\Event\Model\EventPropertyName;
 use App\Domain\Event\Model\EventTemplate;
+use App\Extension\Default\PropertyType\Text;
+use App\Extension\Packages\MicroManager\Author\MicroManager;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag('eventsourcerer.event_template')]
-final class DayPassed implements EventTemplate
+final class OrchestrationStarted implements EventTemplate
 {
-    public const string DATE_EVENT_PROPERTY_ID = '84fb5b0f-10be-429c-add2-584520286fba';
-    public const string DATE_EVENT_PROPERTY_NAME = 'date';
-    public const string EVENT_ID = '30e48a18-af46-4c03-97d6-eb3a92447c3e';
-    public const string EVENT_NAME = 'day-passed';
+    public const string EVENT_ID = '2c79cafa-4900-4013-aaa2-4912c0372a6b';
+    public const string EVENT_NAME = 'orchestration-started';
     private const int TOMBSTONE_AFTER_N_SECONDS = 0; // never
+    public const string ORCHESTRATION_ID_PROPERTY_ID = '6d418ae3-757a-47e5-9576-4613774fab69';
+    private const string ORCHESTRATION_ID_PROPERTY_NAME = 'orchestration-id';
+    private const string PROJECT_ID_PROPERTY_ID = '18b80b8b-3806-4aba-bd94-46a24478c783';
+    private const string PROJECT_ID_PROPERTY_NAME = 'project-id';
 
     public static function id(): EventId
     {
@@ -38,9 +41,15 @@ final class DayPassed implements EventTemplate
     {
         return EventProperties::fromArray([
             new EventProperty(
-                EventPropertyId::fromString(self::DATE_EVENT_PROPERTY_ID),
-                EventPropertyName::fromString(self::DATE_EVENT_PROPERTY_NAME),
-                DateTimeType::create(),
+                EventPropertyId::fromString(self::ORCHESTRATION_ID_PROPERTY_ID),
+                EventPropertyName::fromString(self::ORCHESTRATION_ID_PROPERTY_NAME),
+                Text::create(),
+                false,
+            ),
+            new EventProperty(
+                EventPropertyId::fromString(self::PROJECT_ID_PROPERTY_ID),
+                EventPropertyName::fromString(self::PROJECT_ID_PROPERTY_NAME),
+                Text::create(),
                 false,
             ),
         ]);
@@ -48,7 +57,7 @@ final class DayPassed implements EventTemplate
 
     public static function isSystemEvent(): bool
     {
-        return true;
+        return false;
     }
 
     public static function tombstoneAfterNSeconds(): int
@@ -58,6 +67,6 @@ final class DayPassed implements EventTemplate
 
     public static function author(): Author
     {
-        return Author::eventSourcerer();
+        return MicroManager::author();
     }
 }
