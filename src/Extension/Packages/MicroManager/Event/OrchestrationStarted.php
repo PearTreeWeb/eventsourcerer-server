@@ -14,6 +14,7 @@ use App\Domain\Event\Model\EventPropertyName;
 use App\Domain\Event\Model\EventTemplate;
 use App\Extension\Default\PropertyType\Text;
 use App\Extension\Packages\MicroManager\Author\MicroManager;
+use App\Extension\Packages\MicroManager\PropertyType\OrchestrationId;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag('eventsourcerer.event_template')]
@@ -43,7 +44,7 @@ final class OrchestrationStarted implements EventTemplate
             new EventProperty(
                 EventPropertyId::fromString(self::ORCHESTRATION_ID_PROPERTY_ID),
                 EventPropertyName::fromString(self::ORCHESTRATION_ID_PROPERTY_NAME),
-                Text::create(),
+                OrchestrationId::create(),
                 false,
             ),
             new EventProperty(
