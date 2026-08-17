@@ -24,6 +24,7 @@ services:
         bind:
             $certsFolder: '%kernel.project_dir%/%app.certs.folder.client%'
             $projectRoot: '%kernel.project_dir%'
+            $projectDir: '%kernel.project_dir%'
             $socketApplicationHostname: '%app.socket.application_hostname%'
             $socketCAFilename: '%app.certs.ca_filename%'
             $socketCAKeyFilename: '%app.certs.ca_key_filename%'

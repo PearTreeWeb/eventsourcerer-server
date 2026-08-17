@@ -48,14 +48,62 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $emailAuthCode = null;
 
-    public static function create(UserId $id, EmailAddress $emailAddress, Role $role): self
+    #[ORM\Column(length: 255)]
+    private string $forename = '';
+
+    #[ORM\Column(length: 255)]
+    private string $surname = '';
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $companyName = null;
+
+    public static function create(UserId $id, EmailAddress $emailAddress, Role $role, string $forename = '', string $surname = '', ?string $companyName = null): self
     {
-        $user        = new self();
-        $user->id    = $id->toUuid();
-        $user->email = $emailAddress->toString();
-        $user->roles = [$role->value];
+        $user              = new self();
+        $user->id          = $id->toUuid();
+        $user->email       = $emailAddress->toString();
+        $user->roles       = [$role->value];
+        $user->forename    = $forename;
+        $user->surname     = $surname;
+        $user->companyName = $companyName;
 
         return $user;
+    }
+
+    public function getForename(): string
+    {
+        return $this->forename;
+    }
+
+    public function setForename(string $forename): self
+    {
+        $this->forename = $forename;
+
+        return $this;
+    }
+
+    public function getSurname(): string
+    {
+        return $this->surname;
+    }
+
+    public function setSurname(string $surname): self
+    {
+        $this->surname = $surname;
+
+        return $this;
+    }
+
+    public function getCompanyName(): ?string
+    {
+        return $this->companyName;
+    }
+
+    public function setCompanyName(?string $companyName): self
+    {
+        $this->companyName = $companyName;
+
+        return $this;
     }
 
     public function getId(): Uuid

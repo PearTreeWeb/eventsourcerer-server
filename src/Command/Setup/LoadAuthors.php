@@ -10,7 +10,6 @@ use App\Entity\Author;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Uid\Uuid;
 
 #[AsCommand(name: 'app:setup:load-authors')]
 final readonly class LoadAuthors
@@ -35,7 +34,7 @@ final readonly class LoadAuthors
                 continue;
             }
 
-            $entity = Author::create(Uuid::v4(), $name);
+            $entity = Author::create($author::id(), $name);
             $this->authorRepository->create($entity);
             $createdIds[$name] = (string) $entity->getId();
 

@@ -2,6 +2,7 @@
 
 namespace App\Command\Setup;
 
+use App\Domain\Author\Repository\AuthorRepository;
 use App\Domain\Event\Model\EventProperties;
 use App\Domain\Event\Model\EventProperty;
 use App\Domain\Event\Model\EventTemplate;
@@ -23,7 +24,8 @@ final readonly class LoadTemplates
          */
         private iterable $eventTemplates,
         private EventRepository $eventRepository,
-        private ClockInterface $clock
+        private ClockInterface $clock,
+        private AuthorRepository $authorRepository,
     ) {}
 
     public function __invoke(OutputInterface $output): int
@@ -45,6 +47,10 @@ final readonly class LoadTemplates
                     $now
                 )
             );
+
+            $author = $this->authorRepository->findByName($eventTemplate::author()->toString());
+
+            $event->setAuthorId($author?->getId());
 
             if (!$this->eventRepository->find($eventTemplate::id())) {
                 $this->eventRepository->create($event);

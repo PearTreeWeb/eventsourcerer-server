@@ -27,7 +27,8 @@
         <table class="data-table">
             <thead>
             <tr>
-                <th class="w-3/5 md:w-4/5">Name</th>
+                <th>Name</th>
+                <th>Author</th>
                 <th>Version</th>
                 <th></th>
             </tr>
@@ -35,7 +36,8 @@
             <tbody>
             {% for event in events %}
                 <tr>
-                    <td class="w-3/5 font-medium text-slate-700">{{ event.name }}</td>
+                    <td class="font-medium text-slate-700">{{ event.name }}</td>
+                    <td>{{ author_image(event.authorId) }}</td>
                     <td><span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600">v{{ event.version }}</span></td>
                     <td class="text-right">
                         {% if not event.retired %}
