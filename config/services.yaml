@@ -40,6 +40,7 @@ services:
             iterable $projections: !tagged_iterator eventsourcerer.projection
             iterable $widgets: !tagged_iterator app.widget
             iterable $authors: !tagged_iterator eventsourcerer.author_template
+            iterable $applications: !tagged_iterator eventsourcerer.application
             iterable $eventTemplates: !tagged_iterator eventsourcerer.event_template
             iterable $conditionOperators: !tagged_iterator eventsourcerer.condition_operator
             iterable $steps: !tagged_iterator app.setup_step
@@ -145,6 +146,10 @@ services:
     App\Setup\Step\LoadTemplatesStep:
         tags:
             - { name: app.setup_step, priority: 84 }
+
+    App\Setup\Step\LoadApplicationsStep:
+        tags:
+            - { name: app.setup_step, priority: 83 }
 
     App\Setup\Step\GenerateJwtKeysStep:
         arguments:
