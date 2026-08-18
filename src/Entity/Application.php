@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
+use App\ApiDto\Application as ApplicationDto;
 use App\Domain\Application\Model\ApplicationName;
 use App\Domain\Application\Model\Hostname;
+use App\Processor\ApplicationProcessor;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use PearTreeWeb\EventSourcerer\Common\Model\ApplicationId;
@@ -15,6 +19,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 
 #[Entity]
+#[ApiResource(
+    operations: [
+        new Post(
+            input: ApplicationDto::class,
+            output: ApplicationDto::class,
+            processor: ApplicationProcessor::class,
+        ),
+    ],
+)]
 class Application implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
