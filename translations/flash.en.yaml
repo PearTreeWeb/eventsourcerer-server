@@ -15,11 +15,12 @@ personal_data_not_encrypted: An error occurred whilst attempting to encrypt the 
 projection_deleted_successfully: The Projection has been successfully deleted
 projection_registered_successfully: The State has been successfully registered
 projection_update_succeeded: The Projection is resetting
+projection_updated_successfully: Projection updated
+register_application: Register Application
 settings_updated_successfully: Settings have been successfully updated
 state_edited_successfully: The State has been successfully updated
 user_registered_successfully: You have successfully registered
 user_updated_successfully: User details have successfully been updated
-projection_updated_successfully: Projection updated
 user_password_updated_successfully: Your password has been updated
 user_deleted_successfully: The user has successfully been deleted
 user_deletion_failed: An error occurred whilst attempting to delete the user
