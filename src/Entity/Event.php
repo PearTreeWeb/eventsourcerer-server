@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
+use App\ApiDto\Event as EventDto;
 use App\Domain\Event\Model\EventId;
 use App\Domain\Event\Model\EventProperties;
 use App\Domain\Event\Model\EventProperty as EventPropertyModel;
+use App\Processor\EventProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -17,6 +21,15 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity]
 #[ORM\Index(columns: ['name', 'system_event', 'deleted'])]
 #[ORM\Index(columns: ['tombstone_after_seconds'])]
+#[ApiResource(
+    operations: [
+        new Post(
+            input: EventDto::class,
+            output: EventDto::class,
+            processor: EventProcessor::class,
+        ),
+    ],
+)]
 class Event
 {
     #[ORM\Id]

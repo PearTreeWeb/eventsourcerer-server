@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Common\Model;
+namespace App\Extension\Default\PropertyType;
 
 use App\Domain\Common\Exception\ExpectedDateTimeImmutable;
 use App\Domain\Common\Exception\InvalidDateTimeFormat;
+use App\Domain\Common\Model\Author;
+use App\Domain\Common\Model\Package;
+use App\Domain\Common\Model\Packages;
+use App\Domain\Common\Model\PropertyType;
+use App\Domain\Common\Model\PropertyTypeDescription;
 use App\Extension\Default\ConditionOperators\Excludes;
 use App\Extension\Default\ConditionOperators\Includes;
-use App\Extension\Default\PropertyType\PropertyTypeComparison;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag('eventsourcerer.property_type')]

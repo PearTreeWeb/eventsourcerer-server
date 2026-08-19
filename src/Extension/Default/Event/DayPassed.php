@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Extension\Default\Event;
 
 use App\Domain\Common\Model\Author;
-use App\Domain\Common\Model\DateTimeType;
 use App\Domain\Event\Model\EventId;
 use App\Domain\Event\Model\EventName;
 use App\Domain\Event\Model\EventProperties;
@@ -13,6 +12,7 @@ use App\Domain\Event\Model\EventProperty;
 use App\Domain\Event\Model\EventPropertyId;
 use App\Domain\Event\Model\EventPropertyName;
 use App\Domain\Event\Model\EventTemplate;
+use App\Extension\Default\PropertyType\DateTimeType;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag('eventsourcerer.event_template')]
