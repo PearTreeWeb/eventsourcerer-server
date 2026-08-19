@@ -4,9 +4,11 @@ edit_application: Edit Application
 edit_event: Edit Event
 edit_projection: Edit Projection
 edit_user: Edit User
+events: Events
 projections: Manage Projections
 settings_packages: Settings - Packages
 setup: Setup
+streams: Streams
 users: Manage Users
 view_stream: View Stream
 2fa_login: 2FA Login

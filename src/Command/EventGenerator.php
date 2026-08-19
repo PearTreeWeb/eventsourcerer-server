@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Command;
 
 use ApiPlatform\Metadata\Post;
-use App\Domain\Common\Model\DateTimeType;
 use App\Domain\Event\Query\GetAllNonSystemEvents;
 use App\Entity\Event;
+use App\Extension\Default\PropertyType\DateTimeType;
 use App\Extension\Default\PropertyType\Integer;
 use App\Extension\Default\PropertyType\Text;
 use App\Extension\Default\PropertyType\UUID;
