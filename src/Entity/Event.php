@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\ApiDto\Event as EventDto;
 use App\Domain\Event\Model\EventId;
@@ -28,6 +29,7 @@ use Symfony\Component\Uid\Uuid;
             output: EventDto::class,
             processor: EventProcessor::class,
         ),
+        new GetCollection(),
     ],
 )]
 class Event
