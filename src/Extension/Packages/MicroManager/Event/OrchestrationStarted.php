@@ -13,6 +13,7 @@ use App\Domain\Event\Model\EventPropertyId;
 use App\Domain\Event\Model\EventPropertyName;
 use App\Domain\Event\Model\EventTemplate;
 use App\Extension\Default\PropertyType\Text;
+use App\Extension\Default\PropertyType\UUID;
 use App\Extension\Packages\MicroManager\Author\MicroManager;
 use App\Extension\Packages\MicroManager\PropertyType\OrchestrationId;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -27,6 +28,8 @@ final class OrchestrationStarted implements EventTemplate
     private const string ORCHESTRATION_ID_PROPERTY_NAME = 'orchestration-id';
     private const string PROJECT_ID_PROPERTY_ID = '18b80b8b-3806-4aba-bd94-46a24478c783';
     private const string PROJECT_ID_PROPERTY_NAME = 'project-id';
+    private const string SAGA_TEMPLATE_ID_PROPERTY_ID = 'c2a16c05-c1f8-4d5d-bafd-6e6ac282e8e8';
+    private const string SAGA_TEMPLATE_ID_PROPERTY_NAME = 'saga-template-id';
 
     public static function id(): EventId
     {
@@ -51,6 +54,12 @@ final class OrchestrationStarted implements EventTemplate
                 EventPropertyId::fromString(self::PROJECT_ID_PROPERTY_ID),
                 EventPropertyName::fromString(self::PROJECT_ID_PROPERTY_NAME),
                 Text::create(),
+                false,
+            ),
+            new EventProperty(
+                EventPropertyId::fromString(self::SAGA_TEMPLATE_ID_PROPERTY_ID),
+                EventPropertyName::fromString(self::SAGA_TEMPLATE_ID_PROPERTY_NAME),
+                UUID::create(),
                 false,
             ),
         ]);

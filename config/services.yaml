@@ -123,6 +123,10 @@ services:
             - { name: 'api_platform.doctrine.orm.query_extension.collection' }
             - { name: 'api_platform.doctrine.orm.query_extension.item' }
 
+    App\Infrastructure\ApiPlatform\ExcludeSystemEventsExtension:
+        tags:
+            - { name: 'api_platform.doctrine.orm.query_extension.collection' }
+
     App\Setup\InstallStateService:
         arguments:
             $projectDir: '%kernel.project_dir%'

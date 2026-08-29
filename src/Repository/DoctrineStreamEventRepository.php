@@ -326,11 +326,14 @@ final class DoctrineStreamEventRepository implements StreamEventRepository
         }
 
         $qb
-            ->select('se')
+            ->select('se', 'sep')
             ->join(Event::class, 'e', Join::WITH, 'e.id = se.eventId')
+            ->leftJoin('se.properties', 'sep')
             ->leftJoin(ApplicationCheckpoint::class, 'ac', Join::WITH, '(ac.streamId = se.streamId AND ac.applicationId = :applicationId)')
-            ->andWhere('ac.checkpoint < se.sequence')
-            ->orWhere('ac.checkpoint IS NULL')
+            ->andWhere($qb->expr()->orX(
+                'ac.checkpoint < se.sequence',
+                'ac.checkpoint IS NULL'
+            ))
             ->andWhere('e.systemEvent = false')
             ->andWhere($qb->expr()->neq('se.allSequence', ':lastProcessedAllStreamCheckpoint'))
             ->orderBy('se.allSequence', 'ASC')
