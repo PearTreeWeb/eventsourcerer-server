@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
@@ -32,6 +34,7 @@ use Symfony\Component\Uid\Uuid;
         new GetCollection(),
     ],
 )]
+#[ApiFilter(BooleanFilter::class, properties: ['systemEvent'])]
 class Event
 {
     #[ORM\Id]

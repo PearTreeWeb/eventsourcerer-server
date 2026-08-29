@@ -378,29 +378,33 @@ final readonly class PostgresStreamEventRepository implements StreamEventReposit
             $params['afterCheckpoint'] = $afterCheckpoint->toInt();
         }
 
-        $event = $this->connection->executeQuery($startSql . $endSql, $params)->fetchAssociative();
+        $eventRow = $this->connection->executeQuery($startSql . $endSql, $params)->fetchAssociative();
 
-        if (false === $event) {
+        if (false === $eventRow) {
             return null;
         }
 
-        $createdAt = new \DateTimeImmutable($event['created_at']);
+        $createdAt = new \DateTimeImmutable($eventRow['created_at']);
 
-        return StreamEvent::fromRow(
-            StreamEventId::fromString($event['id']),
-            EventId::fromString($event['event_id']),
-            StreamId::fromString($event['stream_id']),
-            EventName::fromString($event['event_name']),
-            EventVersion::fromInt($event['event_version']),
+        $streamEvent = StreamEvent::fromRow(
+            StreamEventId::fromString($eventRow['id']),
+            EventId::fromString($eventRow['event_id']),
+            StreamId::fromString($eventRow['stream_id']),
+            EventName::fromString($eventRow['event_name']),
+            EventVersion::fromInt($eventRow['event_version']),
             new ArrayCollection(),
             Stream::create(
-                StreamId::fromString($event['stream_id']),
+                StreamId::fromString($eventRow['stream_id']),
                 $createdAt,
             ),
             $createdAt,
-            (int) $event['sequence'],
-            (int) $event['all_sequence'],
+            (int) $eventRow['sequence'],
+            (int) $eventRow['all_sequence'],
         );
+
+        $this->populateProperties($streamEvent);
+
+        return $streamEvent;
     }
 
     public function withStreamId(StreamId $id, int $start, ?int $end = null): iterable
@@ -442,43 +446,47 @@ final readonly class PostgresStreamEventRepository implements StreamEventReposit
             );
             $streamEvent->setPersonalDataHasBeenEncrypted((bool) $row['personal_data_has_been_encrypted']);
 
-            // Fetch properties
-            $propSql = 'SELECT * FROM stream_event_property WHERE stream_event_id = :id';
-            $propRows = $this->connection->fetchAllAssociative($propSql, ['id' => $row['id']]);
-            $properties = new ArrayCollection();
-            foreach ($propRows as $propRow) {
-                $property = new StreamEventProperty();
-                
-                // We need to use reflection or access private properties since there are no setters for everything
-                $reflection = new \ReflectionClass(StreamEventProperty::class);
-                
-                $idProp = $reflection->getProperty('id');
-                $idProp->setAccessible(true);
-                $idProp->setValue($property, (int) $propRow['id']);
-
-                $nameProp = $reflection->getProperty('name');
-                $nameProp->setAccessible(true);
-                $nameProp->setValue($property, $propRow['name']);
-
-                $typeProp = $reflection->getProperty('type');
-                $typeProp->setAccessible(true);
-                $typeProp->setValue($property, $propRow['type']);
-
-                $valProp = $reflection->getProperty('serializedValue');
-                $valProp->setAccessible(true);
-                $valProp->setValue($property, $propRow['serialized_value']);
-
-                $epIdProp = $reflection->getProperty('eventPropertyId');
-                $epIdProp->setAccessible(true);
-                $epIdProp->setValue($property, Uuid::fromString($propRow['event_property_id']));
-
-                $property->setStreamEvent($streamEvent);
-                $properties->add($property);
-            }
-            $streamEvent->setProperties($properties);
+            $this->populateProperties($streamEvent);
 
             return $streamEvent;
         }, $rows);
+    }
+
+    private function populateProperties(StreamEvent $streamEvent): void
+    {
+        $propSql = 'SELECT * FROM stream_event_property WHERE stream_event_id = :id';
+        $propRows = $this->connection->fetchAllAssociative($propSql, ['id' => $streamEvent->getId()->toRfc4122()]);
+        $properties = new ArrayCollection();
+        foreach ($propRows as $propRow) {
+            $property = new StreamEventProperty();
+
+            // We need to use reflection or access private properties since there are no setters for everything
+            $reflection = new \ReflectionClass(StreamEventProperty::class);
+
+            $idProp = $reflection->getProperty('id');
+            $idProp->setAccessible(true);
+            $idProp->setValue($property, (int) $propRow['id']);
+
+            $nameProp = $reflection->getProperty('name');
+            $nameProp->setAccessible(true);
+            $nameProp->setValue($property, $propRow['name']);
+
+            $typeProp = $reflection->getProperty('type');
+            $typeProp->setAccessible(true);
+            $typeProp->setValue($property, $propRow['type']);
+
+            $valProp = $reflection->getProperty('serializedValue');
+            $valProp->setAccessible(true);
+            $valProp->setValue($property, $propRow['serialized_value']);
+
+            $epIdProp = $reflection->getProperty('eventPropertyId');
+            $epIdProp->setAccessible(true);
+            $epIdProp->setValue($property, Uuid::fromString($propRow['event_property_id']));
+
+            $property->setStreamEvent($streamEvent);
+            $properties->add($property);
+        }
+        $streamEvent->setProperties($properties);
     }
 
     public function countEventsWithPersonalDataNotEncryptedBefore(\DateTimeImmutable $before): int
