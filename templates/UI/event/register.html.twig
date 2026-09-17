@@ -14,9 +14,13 @@
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-2xl">
         {{ form_errors(form) }}
         {{ form_start(form, {attr: {'data-controller': 'prototype'}}) }}
-            <div class="mb-5">
+            <div class="mb-5" data-controller="create-event-template">
                 {{ form_label(form.name, 'Event Name', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.name, { attr: { class: 'form-input w-full' }} ) }}
+                {{ form_widget(form.name, {attr: {
+                    'data-create-event-template-target': 'input',
+                    'data-action': 'create-event-template#formatName',
+                    'class': 'form-input w-full'
+                }}) }}
                 {{ form_errors(form.name) }}
             </div>
             <a

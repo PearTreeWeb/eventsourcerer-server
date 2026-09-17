@@ -4,6 +4,6 @@ export default class extends Controller {
     static targets = ['input']
 
     formatName(event) {
-        this.inputTarget.value = event.target.value.replace(' ', '-').toLowerCase()
+        this.inputTarget.value = event.target.value.replace(/\s+/g, '-').toLowerCase()
     }
 }
