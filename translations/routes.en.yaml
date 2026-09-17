@@ -1,3 +1,4 @@
+app_login: Login
 dashboard: Dashboard
 define_projection_mutations: Define Mutations
 edit_application: Edit Application
@@ -10,6 +11,7 @@ register_event: Register Event
 settings_packages: Settings - Packages
 setup: Setup
 streams: Streams
+tools: Tools
 users: Manage Users
 view_stream: View Stream
 2fa_login: 2FA Login
