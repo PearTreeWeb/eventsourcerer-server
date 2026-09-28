@@ -100,7 +100,7 @@ final class DoctrineEventRepository implements EventRepository
         ]);
     }
 
-    public function paginated(int $start, int $max, ?string $search = null): \Countable&\IteratorAggregate
+    public function paginated(int $start, int $max, ?string $search = null, array $authorIds = []): \Countable&\IteratorAggregate
     {
         $queryBuilder = $this
             ->repository
@@ -111,8 +111,14 @@ final class DoctrineEventRepository implements EventRepository
 
         if (null !== $search) {
             $queryBuilder
-                ->where('LOWER(e.name) LIKE :search')
+                ->andWhere('LOWER(e.name) LIKE :search')
                 ->setParameter('search', '%' . strtolower($search) . '%');
+        }
+
+        if (!empty($authorIds)) {
+            $queryBuilder
+                ->andWhere('e.authorId IN (:authorIds)')
+                ->setParameter('authorIds', $authorIds);
         }
 
         return new Paginator($queryBuilder->getQuery());

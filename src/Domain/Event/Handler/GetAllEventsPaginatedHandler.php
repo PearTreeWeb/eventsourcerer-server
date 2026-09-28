@@ -19,6 +19,6 @@ final readonly class GetAllEventsPaginatedHandler
      */
     public function __invoke(GetAllEventsPaginated $query): iterable
     {
-        return $this->eventRepository->paginated($query->start, $query->max, $query->search);
+        return $this->eventRepository->paginated($query->start, $query->max, $query->search, $query->authorIds);
     }
 }

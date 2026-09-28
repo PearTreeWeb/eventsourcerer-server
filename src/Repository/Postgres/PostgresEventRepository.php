@@ -16,6 +16,7 @@ use App\Domain\Event\Model\EventPropertyId;
 use App\Domain\Event\Model\EventPropertyName;
 use App\Extension\Default\PropertyType\Json;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
 use Psr\Clock\ClockInterface;
@@ -196,14 +197,24 @@ final class PostgresEventRepository implements EventRepository
         return array_map(fn (array $row): Event => $this->hydrate($row), $rows);
     }
 
-    public function paginated(int $start, int $max, ?string $search = null): \Countable&\IteratorAggregate
+    public function paginated(int $start, int $max, ?string $search = null, array $authorIds = []): \Countable&\IteratorAggregate
     {
         $sql = 'SELECT * FROM event';
         $params = [];
+        $where = [];
 
         if (null !== $search) {
-            $sql .= ' WHERE LOWER(name) LIKE :search';
+            $where[] = 'LOWER(name) LIKE :search';
             $params['search'] = '%' . strtolower($search) . '%';
+        }
+
+        if (!empty($authorIds)) {
+            $where[] = 'author_id IN (:authorIds)';
+            $params['authorIds'] = $authorIds;
+        }
+
+        if (!empty($where)) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
         }
 
         $sql .= ' LIMIT :max OFFSET :start';
@@ -211,18 +222,19 @@ final class PostgresEventRepository implements EventRepository
         $params['start'] = $start;
 
         $rows = $this->connection->fetchAllAssociative($sql, $params, [
-            'max'   => ParameterType::INTEGER,
-            'start' => ParameterType::INTEGER,
+            'max'       => ParameterType::INTEGER,
+            'start'     => ParameterType::INTEGER,
+            'authorIds' => ArrayParameterType::STRING,
         ]);
 
         $countSql = 'SELECT COUNT(*) FROM event';
-        $countParams = [];
-        if (null !== $search) {
-            $countSql .= ' WHERE LOWER(name) LIKE :search';
-            $countParams['search'] = '%' . strtolower($search) . '%';
+        if (!empty($where)) {
+            $countSql .= ' WHERE ' . implode(' AND ', $where);
         }
 
-        $total = (int) $this->connection->fetchOne($countSql, $countParams);
+        $total = (int) $this->connection->fetchOne($countSql, $params, [
+            'authorIds' => ArrayParameterType::STRING,
+        ]);
         $events = array_map(fn (array $row): Event => $this->hydrate($row), $rows);
 
         return new class($events, $total) implements \Countable, \IteratorAggregate {
