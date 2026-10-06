@@ -187,3 +187,11 @@ services:
     App\Domain\Application\Service\CertificateGenerator:
         class: App\Infrastructure\Service\OpenSSLCertificateGenerator
         arguments:
+
+    App\Infrastructure\Doctrine\DynamicSchemaSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+
+    App\Infrastructure\EventListener\SubscriberIdentificationListener:
+        tags:
+            - { name: kernel.event_subscriber }

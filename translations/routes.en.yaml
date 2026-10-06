@@ -1,4 +1,5 @@
 app_login: Login
+applications: Applications
 dashboard: Dashboard
 define_projection_mutations: Define Mutations
 edit_application: Edit Application
