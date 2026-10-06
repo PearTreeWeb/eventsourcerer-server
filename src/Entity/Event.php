@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
@@ -14,6 +15,7 @@ use App\Domain\Event\Model\EventId;
 use App\Domain\Event\Model\EventProperties;
 use App\Domain\Event\Model\EventProperty as EventPropertyModel;
 use App\Processor\EventProcessor;
+use App\State\EventCollectionProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -31,7 +33,9 @@ use Symfony\Component\Uid\Uuid;
             output: EventDto::class,
             processor: EventProcessor::class,
         ),
-        new GetCollection(),
+        new GetCollection(
+            provider: EventCollectionProvider::class,
+        ),
     ],
 )]
 #[ApiFilter(BooleanFilter::class, properties: ['systemEvent'])]
@@ -72,6 +76,9 @@ class Event
     #[ORM\Column(type: UuidType::NAME, nullable: true)]
     private ?Uuid $authorId = null;
 
+    #[ApiProperty(writable: false)]
+    private ?string $authorName = null;
+
     public static function create(
         EventId $id,
         string $name,
@@ -98,6 +105,18 @@ class Event
     public function setAuthorId(?Uuid $authorId): self
     {
         $this->authorId = $authorId;
+
+        return $this;
+    }
+
+    public function getAuthorName(): ?string
+    {
+        return $this->authorName;
+    }
+
+    public function setAuthorName(?string $authorName): self
+    {
+        $this->authorName = $authorName;
 
         return $this;
     }

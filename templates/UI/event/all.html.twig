@@ -19,47 +19,29 @@
         </div>
     </div>
 
-    {% if search %}
-        {% include 'UI/_partial/search_results_text.html.twig' with {search, count} %}
+    {% if authors|length > 1 %}
+        <div class="mb-6 flex flex-wrap gap-4 items-center bg-slate-50 p-4 rounded-lg border border-slate-200"
+             data-controller="event-filter"
+             data-event-filter-url-template-value="{{ path('events', {page: 1, search: search ?: 'EMPTY_SEARCH', authors: 'AUTHORS_PLACEHOLDER'})|raw }}"
+             data-event-filter-frame-id-value="events-list">
+            <span class="text-sm font-medium text-slate-600">Filter by Author:</span>
+            {% for author in authors %}
+                <label class="inline-flex items-center cursor-pointer group">
+                    <input type="checkbox"
+                           class="author-filter form-checkbox rounded text-emerald-600 focus:ring-emerald-500"
+                           value="{{ author.id.toString() }}"
+                           data-event-filter-target="checkbox"
+                           data-action="change->event-filter#filter"
+                           {% if author.id.toString() in selectedAuthorIds %}checked{% endif %}>
+                    <span class="ml-2 text-sm text-slate-700 group-hover:text-slate-900">{{ author.name }}</span>
+                </label>
+            {% endfor %}
+        </div>
     {% endif %}
 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <table class="data-table">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Author</th>
-                <th>Version</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for event in events %}
-                <tr>
-                    <td class="font-medium text-slate-700">{{ event.name }}</td>
-                    <td>{{ author_image(event.authorId) }}</td>
-                    <td><span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600">v{{ event.version }}</span></td>
-                    <td class="text-right">
-                        {% if not event.retired %}
-                            <a class="text-slate-400 hover:text-emerald-600 transition-colors"
-                               data-tippy-target="children"
-                               data-tippy-content="Create new version of event"
-                               href="{{ path('edit_event', {id: event.id}) }}">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </a>
-                        {% else %}
-                            <a class="text-slate-400 hover:text-slate-600 transition-colors"
-                               data-tippy-target="children"
-                               data-tippy-content="View legacy version of event"
-                               href="{{ path('view_event', {id: event.id}) }}">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                            </a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {% include 'UI/_partial/pagination.html.twig' with {pages, route: 'events', id: null} %}
-    </div>
+    {% include 'UI/event/_events_list.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
 {% endblock %}

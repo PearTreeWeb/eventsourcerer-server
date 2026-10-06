@@ -48,9 +48,10 @@ interface EventRepository
     public function findByEventIds(array $ids): array;
 
     /**
+     * @param string[] $authorIds
      * @return \Countable&\IteratorAggregate<int, Event>
      */
-    public function paginated(int $start, int $max, ?string $search = null): \Countable&\IteratorAggregate;
+    public function paginated(int $start, int $max, ?string $search = null, array $authorIds = []): \Countable&\IteratorAggregate;
 
     /**
      * @return array<string, string[]> map of eventId (string) to array of eventPropertyIds (string)

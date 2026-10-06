@@ -45,7 +45,7 @@ final readonly class EventRepository implements EventRepositoryInterface
         return $this->findByEventIds([]);
     }
 
-    public function paginated(int $start, int $max, ?string $search = null): \Countable&\IteratorAggregate
+    public function paginated(int $start, int $max, ?string $search = null, array $authorIds = []): \Countable&\IteratorAggregate
     {
         throw new \RuntimeException('not implemented');
     }
@@ -68,5 +68,9 @@ final readonly class EventRepository implements EventRepositoryInterface
     public function findStrict(EventId $id): Event
     {
         return $this->find($id);
+    }
+    public function allPersonalDataPropertyIds(): array
+    {
+        return [];
     }
 }

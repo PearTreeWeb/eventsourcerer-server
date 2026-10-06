@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Author\Repository;
 
+use App\Domain\Author\Model\AuthorId;
 use App\Entity\Author;
 
 interface AuthorRepository
 {
     public function findByName(string $name): ?Author;
+
+    public function findById(AuthorId $id): ?Author;
 
     public function create(Author $author): Author;
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Domain\Author\Model\AuthorId;
 use App\Domain\Author\Repository\AuthorRepository;
 use App\Entity\Author;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,6 +23,11 @@ final class DoctrineAuthorRepository implements AuthorRepository
     public function findByName(string $name): ?Author
     {
         return $this->repository->findOneBy(['name' => $name]);
+    }
+
+    public function findById(AuthorId $id): ?Author
+    {
+        return $this->repository->find($id->toUuid());
     }
 
     public function create(Author $author): Author

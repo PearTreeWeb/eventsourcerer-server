@@ -16,6 +16,8 @@ final readonly class GetAllEventsPaginated implements Query
     public function __construct(
         public int $start,
         public int $max,
-        public ?string $search = null
+        public ?string $search = null,
+        /** @var string[] */
+        public array $authorIds = []
     ) {}
 }
