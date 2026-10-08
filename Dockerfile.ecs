@@ -1,3 +1,4 @@
+# Production Dockerfile for Amazon ECS
 FROM dunglas/frankenphp:1-builder-php8.5-bookworm AS builder
 
 # Copy xcaddy in the builder image
@@ -17,13 +18,15 @@ RUN export CGO_ENABLED=1 \
             --output /usr/local/bin/frankenphp \
             --with github.com/dunglas/frankenphp=./ \
             --with github.com/dunglas/frankenphp/caddy=./caddy/ \
-            --with github.com/dunglas/caddy-cbrotli \
             --with github.com/baldinof/caddy-supervisor \
-        && break || { echo "xcaddy build failed (attempt $i), retrying with GOPROXY=direct..."; GOPROXY=direct xcaddy build --output /usr/local/bin/frankenphp --with github.com/dunglas/frankenphp=./ --with github.com/dunglas/frankenphp/caddy=./caddy/ --with github.com/dunglas/caddy-cbrotli --with github.com/baldinof/caddy-supervisor && break || sleep 5; }; \
+        && break || { echo "xcaddy build failed (attempt $i), retrying with GOPROXY=direct..."; GOPROXY=direct xcaddy build --output /usr/local/bin/frankenphp --with github.com/dunglas/frankenphp=./ --with github.com/dunglas/frankenphp/caddy=./caddy/ --with github.com/baldinof/caddy-supervisor && break || sleep 5; }; \
     done
 
-#FROM dunglas/frankenphp:latest AS runner
 FROM dunglas/frankenphp:php8.5-bookworm AS runner
+
+# Set environment variables
+ENV APP_ENV=prod
+ENV FRANKENPHP_CONFIG="import /etc/frankenphp/Caddyfile"
 
 COPY --from=builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
 
@@ -34,69 +37,61 @@ RUN for i in 1 2 3 4 5; do \
     && apt-get install -y --no-install-recommends --allow-unauthenticated \
     acl \
     build-essential \
-    cron \
-    gifsicle \
-    git \
-    gpg \
-    jpegoptim \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libmagickwand-dev \
-    libonig-dev \
-    libpng-dev \
     libpq-dev \
-    librabbitmq-dev \
-    libxslt1-dev \
     libzip-dev \
-    locales \
-    optipng \
-    pngquant \
-    procps \
-    supervisor \
-    vim \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libxslt1-dev \
+    libmagickwand-dev \
+    librabbitmq-dev \
+    libicu-dev \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*.deb /tmp/* /var/tmp/*
 
-# AMQP
-RUN pecl install amqp
-RUN docker-php-ext-enable amqp
-
-# Redis
-RUN printf "\n" | pecl install redis \
-&& docker-php-ext-enable redis
-
-# Install non default extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-
+# Install PHP extensions
 RUN install-php-extensions \
+    pdo_pgsql \
+    redis \
+    amqp \
+    gd \
+    intl \
+    zip \
+    opcache \
     bcmath \
     exif \
-    gd \
-    opcache \
     pcntl \
-    pdo_pgsql \
-    soap \
-    zip \
-    xsl
+    xsl \
+    soap
 
-## Install Composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-RUN php -r "if (hash_file('sha384', 'composer-setup.php') === 'c8b085408188070d5f52bcfe4ecfbee5f727afa458b2573b8eaaf77b3419b0bf2768dc67c86944da1544f06fa544fd47') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-RUN php composer-setup.php
-RUN php -r "unlink('composer-setup.php');"
-RUN mv composer.phar /usr/local/bin/composer
+# Copy Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN cp $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini && \
-    sed -i 's/memory_limit = .*/memory_limit = 2000M/' $PHP_INI_DIR/php.ini
-
+# Set working directory
 WORKDIR /app
 
+# Copy application source code
 COPY . .
 
-RUN composer install --no-interaction --no-dev --optimize-autoloader
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
+# Set permissions
+RUN chown -R www-data:www-data var public/uploads 2>/dev/null || true
+RUN chmod -R 775 var public/uploads 2>/dev/null || true
+
+# Copy production Caddyfile
+COPY docker/php/Caddyfile.ecs /etc/frankenphp/Caddyfile
+
+# Copy entrypoint script
 COPY docker/php/entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
+
+# ECS specific: Use a fixed port if needed, or rely on env var
+EXPOSE 80
+EXPOSE 443
+EXPOSE 1984
 
 ENTRYPOINT ["docker-entrypoint"]
 

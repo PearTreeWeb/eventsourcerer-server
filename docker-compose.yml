@@ -64,7 +64,9 @@ services:
       - "traefik.http.routers.bhi-mailpit.entrypoints=websecure"
       - "traefik.http.services.bhi-mailpit.loadbalancer.server.port=8025"
   php:
-    image: public.ecr.aws/z0p1v3n5/eventsourcerer/app:latest
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     platform: "linux/amd64"
     ports:
       - 5189:5189
