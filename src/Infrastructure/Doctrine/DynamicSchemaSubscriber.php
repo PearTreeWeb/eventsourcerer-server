@@ -4,41 +4,44 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Doctrine;
 
-use Doctrine\Common\EventSubscriber;
-use Doctrine\DBAL\Event\ConnectionEventArgs;
-use Doctrine\DBAL\Events;
+use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Driver\Middleware;
+use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 
-final class DynamicSchemaSubscriber implements EventSubscriber
+/**
+ * DBAL 4 middleware that sets the PostgreSQL search_path on every new connection
+ * so that each tenant's schema is used automatically.
+ *
+ * For single-tenant / local installs where SUBSCRIBER_ID is not set the middleware
+ * is a no-op and the default search_path is left unchanged.
+ */
+final class DynamicSchemaSubscriber implements Middleware
 {
-    private string $subscriberId;
-
-    public function __construct()
+    public function wrap(Driver $driver): Driver
     {
-        $this->subscriberId = $_ENV['SUBSCRIBER_ID'] ?? $_SERVER['SUBSCRIBER_ID'] ?? 'default';
-    }
+        return new class($driver) extends AbstractDriverMiddleware {
+            public function connect(array $params): Connection
+            {
+                $connection = parent::connect($params);
 
-    public function getSubscribedEvents(): array
-    {
-        return [
-            Events::postConnect,
-        ];
-    }
+                // Read the subscriber ID that SubscriberIdentificationListener set
+                // on the very same request.
+                $subscriberId = $_ENV['SUBSCRIBER_ID'] ?? $_SERVER['SUBSCRIBER_ID'] ?? 'default';
 
-    public function postConnect(ConnectionEventArgs $args): void
-    {
-        // Re-check subscriber ID in case it was set by the Request listener
-        $this->subscriberId = $_ENV['SUBSCRIBER_ID'] ?? $_SERVER['SUBSCRIBER_ID'] ?? 'default';
+                if ($subscriberId === 'default') {
+                    return $connection;
+                }
 
-        if ($this->subscriberId === 'default') {
-            return;
-        }
+                // Validate to prevent SQL injection before interpolating into the statement.
+                if (!preg_match('/^[a-zA-Z0-9_]+$/', $subscriberId)) {
+                    return $connection;
+                }
 
-        // Validate subscriberId to prevent SQL injection
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $this->subscriberId)) {
-            return;
-        }
+                $connection->exec(sprintf('SET search_path TO %s, public', $subscriberId));
 
-        $connection = $args->getConnection();
-        $connection->executeStatement(sprintf('SET search_path TO %s, public', $this->subscriberId));
+                return $connection;
+            }
+        };
     }
 }

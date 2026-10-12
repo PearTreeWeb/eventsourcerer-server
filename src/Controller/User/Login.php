@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\User;
 
-use App\Domain\User\Repository\UserRepository;
+use App\Setup\InstallStateService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,9 +13,9 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 #[Route('/login', name: 'app_login')]
 final class Login extends AbstractController
 {
-    public function __invoke(AuthenticationUtils $authenticationUtils, UserRepository $userRepository): Response
+    public function __invoke(AuthenticationUtils $authenticationUtils, InstallStateService $installState): Response
     {
-        if (count($userRepository->all()) === 0) {
+        if (!$installState->isInstalled()) {
             return $this->redirectToRoute('setup');
         }
 

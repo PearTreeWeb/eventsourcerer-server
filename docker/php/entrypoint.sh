@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+# Build DATABASE_URL from individual ECS-injected components (no-op locally where DATABASE_URL is already set)
+if [ -z "${DATABASE_URL:-}" ] && [ -n "${DB_HOST:-}" ]; then
+    export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require"
+fi
+
 # Ensure certs directory exists
 mkdir -p /app/certs
 chown -R www-data:www-data /app/certs

@@ -190,7 +190,7 @@ services:
 
     App\Infrastructure\Doctrine\DynamicSchemaSubscriber:
         tags:
-            - { name: doctrine.event_subscriber, connection: default }
+            - { name: doctrine.middleware }
 
     App\Infrastructure\EventListener\SubscriberIdentificationListener:
         tags:
