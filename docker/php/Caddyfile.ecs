@@ -1,30 +1,37 @@
 {
 	{$CADDY_GLOBAL_OPTIONS}
 
-    supervisor {
-        php bin/console messenger:consume async --no-interaction {
-            num_workers 5
-        }
+	supervisor {
+		#php bin/console messenger:consume async --no-interaction {
+		#	replicas 5
+		#}
 
-        php bin/console messenger:consume projections --no-interaction {
-            num_workers 5
-        }
+		#php bin/console messenger:consume projections --no-interaction {
+		#	replicas 5
+		#}
 
-        php bin/console app:socket-server:start --no-interaction
-    }
+		#php bin/console app:socket-server:start --no-interaction
+	}
 
 	frankenphp {
 		{$FRANKENPHP_CONFIG}
 	}
 
-	order vulcain after reverse_proxy
+	# Vulcain is not compiled in xcaddy; keep disabled
+	#order vulcain after reverse_proxy
 	order php_server before file_server
 	order php before file_server
 }
 
 {$SERVER_NAME::80} {
 	root * public/
-	encode zstd br gzip
+	encode zstd gzip
+
+	# Stream access and error logs to stdout for CloudWatch
+	log {
+		output stdout
+		format json
+	}
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}
 
