@@ -41,8 +41,10 @@ if [ ! -f /app/certs/eventsourcerer.docker.localhost.pem ]; then
 fi
 
 # Run migrations
-echo "Running database migrations..."
-php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || echo "Migrations failed, continuing..."
+if [ "${SKIP_MIGRATIONS:-false}" != "true" ]; then
+    echo "Running database migrations..."
+    php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || echo "Migrations failed, continuing..."
+fi
 
 # Execute the main command
 exec "$@"

@@ -1,18 +1,6 @@
 {
 	{$CADDY_GLOBAL_OPTIONS}
 
-	supervisor {
-		#php bin/console messenger:consume async --no-interaction {
-		#	replicas 5
-		#}
-
-		#php bin/console messenger:consume projections --no-interaction {
-		#	replicas 5
-		#}
-
-		#php bin/console app:socket-server:start --no-interaction
-	}
-
 	frankenphp {
 		{$FRANKENPHP_CONFIG}
 	}
